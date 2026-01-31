@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: vidtag-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - vidtag-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vidtag-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Redis connection uses service name
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      # API Keys from .env file
+      VIDTAG_CLAUDE_API_KEY: ${VIDTAG_CLAUDE_API_KEY}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      RAINDROP_API_TOKEN: ${RAINDROP_API_TOKEN:-}
+
+      # Optional settings
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - vidtag-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
+
+networks:
+  vidtag-network:
+    driver: bridge

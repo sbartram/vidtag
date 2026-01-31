@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!CLAUDE.md
+
+# Test data
+src/test/
+
+# Local settings
+.claude/
+compose.yaml

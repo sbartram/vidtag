@@ -1,5 +1,6 @@
 # TODO
 
 - [X] remove .claude/settings.local.json from git
-- [] add a tag exclusion list defined in properties
+- [X] add a tag exclusion list defined in properties
+- [ ] OAuth2 support to get full youtube access
 

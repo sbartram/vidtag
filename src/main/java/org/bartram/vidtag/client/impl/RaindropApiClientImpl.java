@@ -38,7 +38,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
 
     @Override
     public List<RaindropTag> getUserTags(String userId) {
-        log.debug("Fetching tags for user: {}", userId);
+        log.atDebug().setMessage("Fetching tags for user: {}").addArgument(userId).log();
 
         try {
             TagsResponse response = restClient.get()
@@ -47,7 +47,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .body(TagsResponse.class);
 
             if (response == null || response.items == null) {
-                log.warn("No tags found for user: {}", userId);
+                log.atWarn().setMessage("No tags found for user: {}").addArgument(userId).log();
                 return List.of();
             }
 
@@ -55,18 +55,18 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .map(tagItem -> new RaindropTag(tagItem.tag))
                     .collect(Collectors.toList());
 
-            log.info("Fetched {} tags for user {}", tags.size(), userId);
+            log.atInfo().setMessage("Fetched {} tags for user {}").addArgument(tags.size()).addArgument(userId).log();
             return tags;
 
         } catch (Exception e) {
-            log.error("Failed to fetch tags for user: {}", userId, e);
+            log.atError().setMessage("Failed to fetch tags for user: {}").addArgument(userId).setCause(e).log();
             throw new RuntimeException("Failed to fetch Raindrop tags", e);
         }
     }
 
     @Override
     public List<RaindropCollection> getUserCollections(String userId) {
-        log.debug("Fetching collections for user: {}", userId);
+        log.atDebug().setMessage("Fetching collections for user: {}").addArgument(userId).log();
 
         try {
             CollectionsResponse response = restClient.get()
@@ -75,7 +75,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .body(CollectionsResponse.class);
 
             if (response == null || response.items == null) {
-                log.warn("No collections found for user: {}", userId);
+                log.atWarn().setMessage("No collections found for user: {}").addArgument(userId).log();
                 return List.of();
             }
 
@@ -83,18 +83,18 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .map(item -> new RaindropCollection(item.id, item.title))
                     .collect(Collectors.toList());
 
-            log.info("Fetched {} collections for user {}", collections.size(), userId);
+            log.atInfo().setMessage("Fetched {} collections for user {}").addArgument(collections.size()).addArgument(userId).log();
             return collections;
 
         } catch (Exception e) {
-            log.error("Failed to fetch collections for user: {}", userId, e);
+            log.atError().setMessage("Failed to fetch collections for user: {}").addArgument(userId).setCause(e).log();
             throw new RuntimeException("Failed to fetch Raindrop collections", e);
         }
     }
 
     @Override
     public boolean bookmarkExists(Long collectionId, String url) {
-        log.debug("Checking if bookmark exists in collection {}: {}", collectionId, url);
+        log.atDebug().setMessage("Checking if bookmark exists in collection {}: {}").addArgument(collectionId).addArgument(url).log();
 
         try {
             // Search for raindrops in the collection by URL
@@ -111,18 +111,18 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                             response.items != null &&
                             !response.items.isEmpty();
 
-            log.debug("Bookmark exists in collection {}: {}", collectionId, exists);
+            log.atDebug().setMessage("Bookmark exists in collection {}: {}").addArgument(collectionId).addArgument(exists).log();
             return exists;
 
         } catch (Exception e) {
-            log.error("Failed to check bookmark existence: {}", url, e);
+            log.atError().setMessage("Failed to check bookmark existence: {}").addArgument(url).setCause(e).log();
             return false; // Assume doesn't exist on error
         }
     }
 
     @Override
     public void createBookmark(Long collectionId, String url, String title, List<String> tags) {
-        log.debug("Creating bookmark in collection {}: {}", collectionId, url);
+        log.atDebug().setMessage("Creating bookmark in collection {}: {}").addArgument(collectionId).addArgument(url).log();
 
         try {
             CreateRaindropRequest request = new CreateRaindropRequest(
@@ -139,17 +139,17 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .retrieve()
                     .toBodilessEntity();
 
-            log.info("Created bookmark in collection {}: {}", collectionId, title);
+            log.atInfo().setMessage("Created bookmark in collection {}: {}").addArgument(collectionId).addArgument(title).log();
 
         } catch (Exception e) {
-            log.error("Failed to create bookmark: {}", url, e);
+            log.atError().setMessage("Failed to create bookmark: {}").addArgument(url).setCause(e).log();
             throw new RuntimeException("Failed to create Raindrop bookmark", e);
         }
     }
 
     @Override
     public List<RaindropCollection> getCollections() {
-        log.debug("Fetching all collections");
+        log.atDebug().setMessage("Fetching all collections").log();
 
         try {
             CollectionsResponse response = restClient.get()
@@ -158,7 +158,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                 .body(CollectionsResponse.class);
 
             if (response == null || response.items == null) {
-                log.warn("No collections found");
+                log.atWarn().setMessage("No collections found").log();
                 return List.of();
             }
 
@@ -166,18 +166,18 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                 .map(item -> new RaindropCollection(item.id, item.title))
                 .collect(Collectors.toList());
 
-            log.debug("Retrieved {} collections", collections.size());
+            log.atDebug().setMessage("Retrieved {} collections").addArgument(collections.size()).log();
             return collections;
 
         } catch (Exception e) {
-            log.error("Error fetching collections: {}", e.getMessage(), e);
+            log.atError().setMessage("Error fetching collections: {}").addArgument(e.getMessage()).setCause(e).log();
             return List.of();
         }
     }
 
     @Override
     public Long createCollection(String title) {
-        log.debug("Creating collection: {}", title);
+        log.atDebug().setMessage("Creating collection: {}").addArgument(title).log();
 
         try {
             Map<String, Object> requestBody = Map.of("title", title);
@@ -190,16 +190,16 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                 .body(CollectionCreateResponse.class);
 
             if (response == null || response.item == null) {
-                log.error("Failed to create collection '{}': null response", title);
+                log.atError().setMessage("Failed to create collection '{}': null response").addArgument(title).log();
                 throw new RuntimeException("Failed to create collection: " + title);
             }
 
             Long collectionId = response.item.id;
-            log.info("Created collection '{}' with ID: {}", title, collectionId);
+            log.atInfo().setMessage("Created collection '{}' with ID: {}").addArgument(title).addArgument(collectionId).log();
             return collectionId;
 
         } catch (Exception e) {
-            log.error("Error creating collection '{}': {}", title, e.getMessage(), e);
+            log.atError().setMessage("Error creating collection '{}': {}").addArgument(title).addArgument(e.getMessage()).setCause(e).log();
             throw new RuntimeException("Failed to create collection: " + title, e);
         }
     }

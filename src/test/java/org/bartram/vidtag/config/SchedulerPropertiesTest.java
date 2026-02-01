@@ -1,13 +1,16 @@
 package org.bartram.vidtag.config;
 
+import org.bartram.vidtag.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import(TestcontainersConfiguration.class)
 @TestPropertySource(properties = {
     "vidtag.scheduler.enabled=true",
     "vidtag.scheduler.fixed-delay-hours=1",

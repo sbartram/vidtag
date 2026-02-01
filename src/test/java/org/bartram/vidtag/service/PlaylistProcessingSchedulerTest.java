@@ -52,7 +52,7 @@ class PlaylistProcessingSchedulerTest {
 
         TagPlaylistRequest request = requestCaptor.getValue();
         assertThat(request.playlistInput()).isEqualTo("PLxyz123");
-        assertThat(request.raindropCollectionTitle()).isEqualTo("Videos");
+        // Collection is now determined by AI, not passed in request
         assertThat(request.filters()).isNotNull();
         assertThat(request.tagStrategy()).isEqualTo(TagStrategy.SUGGEST);
         assertThat(request.verbosity()).isNull();

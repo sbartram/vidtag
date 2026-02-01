@@ -5,6 +5,7 @@ import org.bartram.vidtag.client.YouTubeApiClient;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.bartram.vidtag.model.VideoMetadata;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -15,8 +16,12 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
 	@Bean
 	@ServiceConnection(name = "redis")
@@ -82,6 +87,23 @@ class TestcontainersConfiguration {
 				return 1L; // Return dummy ID
 			}
 		};
+	}
+
+	/**
+	 * Provides a mock ChatClient for tests when Claude API key is not configured.
+	 */
+	@Bean
+	@ConditionalOnMissingBean(ChatClient.class)
+	ChatClient chatClient() {
+		ChatClient chatClient = mock(ChatClient.class);
+		ChatClient.ChatClientRequestSpec requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
+		ChatClient.CallResponseSpec callResponseSpec = mock(ChatClient.CallResponseSpec.class);
+
+		when(chatClient.prompt(anyString())).thenReturn(requestSpec);
+		when(requestSpec.call()).thenReturn(callResponseSpec);
+		when(callResponseSpec.content()).thenReturn("Videos"); // Default fallback collection
+
+		return chatClient;
 	}
 
 }

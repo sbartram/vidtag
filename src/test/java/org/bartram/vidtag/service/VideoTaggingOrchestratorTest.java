@@ -33,6 +33,9 @@ class VideoTaggingOrchestratorTest {
     @Mock
     private VideoTaggingService videoTaggingService;
 
+    @Mock
+    private CollectionSelectionService collectionSelectionService;
+
     private VideoTaggingOrchestrator orchestrator;
 
     private List<ProgressEvent> capturedEvents;
@@ -40,7 +43,14 @@ class VideoTaggingOrchestratorTest {
 
     @BeforeEach
     void setUp() {
-        orchestrator = new VideoTaggingOrchestrator(youtubeService, raindropService, videoTaggingService);
+        orchestrator = new VideoTaggingOrchestrator(
+            youtubeService,
+            raindropService,
+            videoTaggingService,
+            collectionSelectionService
+        );
+        // Default mock behavior for collection selection
+        when(collectionSelectionService.selectCollection(anyString())).thenReturn("Tech Videos");
         capturedEvents = new ArrayList<>();
         eventCaptor = capturedEvents::add;
     }
@@ -50,7 +60,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -75,7 +84,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -100,7 +108,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -139,7 +146,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             new TagStrategy(5, 0.5, null),
             null
@@ -189,7 +195,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -232,13 +237,13 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Nonexistent Collection",
             null,
             null,
             null
         );
 
         when(youtubeService.extractPlaylistId("PLtest123")).thenReturn("PLtest123");
+        when(collectionSelectionService.selectCollection("PLtest123")).thenReturn("Nonexistent Collection");
         when(raindropService.resolveCollectionId(eq("default"), eq("Nonexistent Collection"))).thenReturn(null);
 
         // When
@@ -260,7 +265,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -307,7 +311,6 @@ class VideoTaggingOrchestratorTest {
         VideoFilters filters = new VideoFilters(Instant.now().minusSeconds(86400), 1800, 5);
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             filters,
             null,
             null
@@ -331,7 +334,6 @@ class VideoTaggingOrchestratorTest {
         String playlistUrl = "https://www.youtube.com/playlist?list=PLtest123";
         TagPlaylistRequest request = new TagPlaylistRequest(
             playlistUrl,
-            "Tech Videos",
             null,
             null,
             null
@@ -355,7 +357,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -402,7 +403,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -429,7 +429,6 @@ class VideoTaggingOrchestratorTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -474,7 +473,6 @@ class VideoTaggingOrchestratorTest {
         TagStrategy strategy = new TagStrategy(3, 0.8, "Focus on programming");
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             strategy,
             null

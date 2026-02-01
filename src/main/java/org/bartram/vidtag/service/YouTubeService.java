@@ -138,4 +138,37 @@ public class YouTubeService {
             playlistName, throwable.getMessage());
         throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
+
+    /**
+     * Get playlist metadata (title and description).
+     * For now, returns basic metadata based on playlist ID.
+     * Can be enhanced later to fetch actual metadata from YouTube API.
+     *
+     * @param playlistId playlist ID
+     * @return playlist metadata
+     */
+    public PlaylistMetadata getPlaylistMetadata(String playlistId) {
+        log.debug("Fetching metadata for playlist: {}", playlistId);
+        // For now, return basic metadata - can be enhanced later with actual API call
+        return new PlaylistMetadata(playlistId, "");
+    }
+
+    /**
+     * Get videos from a playlist with a maximum count limit.
+     * Convenience method that wraps fetchPlaylistVideos with simple maxVideos filter.
+     *
+     * @param playlistId playlist ID
+     * @param maxVideos maximum number of videos to return
+     * @return list of video metadata
+     */
+    public List<VideoMetadata> getPlaylistVideos(String playlistId, int maxVideos) {
+        log.debug("Fetching up to {} videos from playlist: {}", maxVideos, playlistId);
+        VideoFilters filters = new VideoFilters(null, null, maxVideos);
+        return fetchPlaylistVideos(playlistId, filters);
+    }
+
+    /**
+     * Simple record for playlist metadata.
+     */
+    public record PlaylistMetadata(String title, String description) {}
 }

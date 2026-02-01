@@ -157,6 +157,43 @@ VIDTAG_TAGGING_BLOCKED_TAGS="spam,promotional,clickbait"
 
 Blocked tags are logged at DEBUG level for visibility.
 
+### AI-Powered Collection Selection
+
+VidTag automatically determines the best Raindrop.io collection for each YouTube playlist:
+
+**How It Works:**
+1. Analyzes playlist metadata (title, description)
+2. Samples first 10 video titles from the playlist
+3. Uses Claude AI to choose the most appropriate collection from your existing Raindrop collections
+4. Falls back to configured collection when uncertain
+5. Caches decisions to reduce API calls (configurable TTL)
+
+**Configuration:**
+```yaml
+vidtag:
+  raindrop:
+    fallback-collection: "Videos"  # Used when AI confidence is low (default: "Videos")
+    collection-cache-ttl: "24h"    # How long to cache playlist → collection mappings (default: 24h)
+    collections-list-cache-ttl: "1h"  # How long to cache your collections list (default: 1h)
+```
+
+**Environment Variables:**
+```bash
+VIDTAG_RAINDROP_FALLBACK_COLLECTION="Uncategorized"
+VIDTAG_RAINDROP_COLLECTION_CACHE_TTL="48h"
+VIDTAG_RAINDROP_COLLECTIONS_LIST_CACHE_TTL="2h"
+```
+
+**Fallback Triggers:**
+- AI explicitly indicates low confidence
+- AI suggests a collection that doesn't exist
+- Circuit breaker open (Claude API unavailable)
+- Empty playlist (no videos to analyze)
+- YouTube API failure (can't fetch playlist metadata)
+
+**Automatic Fallback Creation:**
+If the configured fallback collection doesn't exist in your Raindrop account, VidTag automatically creates it to prevent processing failures.
+
 ## Development Workflow
 
 When adding new features to this Spring Boot application:
@@ -177,6 +214,7 @@ When adding new features to this Spring Boot application:
 - Raindrop service with Redis caching (15min TTL) and collection title resolution
 - Video tagging service with Spring AI (Claude integration)
 - Video tagging orchestrator with batch processing (10 videos/batch)
+- **AI-powered collection selection** - automatically determines the best collection for each playlist
 - REST controller with SSE streaming support
 - Integration tests with Testcontainers
 - Stub implementations for testing without external API dependencies
@@ -187,6 +225,24 @@ POST /api/v1/playlists/tag
 Content-Type: application/json
 Accept: text/event-stream
 ```
+
+**Request Body:**
+```json
+{
+  "playlistInput": "PLxxx... or https://www.youtube.com/playlist?list=PLxxx...",
+  "filters": {
+    "maxVideos": 50,
+    "skipExisting": true,
+    "minDuration": "PT5M"
+  },
+  "tagStrategy": "SUGGEST",
+  "verbosity": "NORMAL"
+}
+```
+
+**Notes:**
+- Collection is automatically determined by AI (not specified in request)
+- All fields except `playlistInput` are optional
 
 ### Testing
 Integration tests are disabled by default (require API key):
@@ -241,3 +297,30 @@ VIDTAG_YT_PLAYLIST_IDS="PLxxx...,PLyyy...,PLzzz..."
 - Environment variable configuration
 - Non-root container user for security
 - See [docs/DOCKER.md](docs/DOCKER.md) for deployment guide
+
+## Breaking Changes
+
+### v2.0 - AI-Powered Collection Selection
+
+**BREAKING:** Removed `raindropCollectionTitle` field from API
+
+VidTag now automatically determines the appropriate Raindrop collection using AI analysis.
+The collection field has been removed from the API request.
+
+**Migration:**
+- **API users:** Remove `raindropCollectionTitle` from request bodies
+- **Scheduler users:** No changes required (previously used hardcoded "Videos" collection)
+
+**Configuration (optional):**
+Customize the fallback collection via:
+```yaml
+vidtag:
+  raindrop:
+    fallback-collection: "Videos"
+```
+
+**Benefits:**
+- No manual collection selection required
+- Intelligent categorization based on playlist content
+- Consistent behavior across API and scheduler
+- Cached decisions reduce AI API costs

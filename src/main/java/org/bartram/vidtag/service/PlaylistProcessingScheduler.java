@@ -24,7 +24,6 @@ import java.util.List;
 public class PlaylistProcessingScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(PlaylistProcessingScheduler.class);
-    private static final String DEFAULT_COLLECTION = "Videos";
 
     private final YouTubeService youtubeService;
     private final VideoTaggingOrchestrator orchestrator;
@@ -87,9 +86,9 @@ public class PlaylistProcessingScheduler {
 
             try {
                 // Create request with default settings
+                // Collection is automatically determined by AI
                 TagPlaylistRequest request = new TagPlaylistRequest(
                     playlistId,
-                    DEFAULT_COLLECTION,
                     new VideoFilters(null, null, null),
                     TagStrategy.SUGGEST,
                     null

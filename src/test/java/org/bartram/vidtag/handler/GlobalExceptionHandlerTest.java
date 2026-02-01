@@ -64,8 +64,7 @@ class GlobalExceptionHandlerTest {
     void shouldHandleValidationErrors() {
         var bindingResult = mock(BindingResult.class);
         var fieldErrors = List.of(
-            new FieldError("request", "playlistInput", "playlistInput is required"),
-            new FieldError("request", "raindropCollectionTitle", "raindropCollectionTitle is required")
+            new FieldError("request", "playlistInput", "playlistInput is required")
         );
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
@@ -77,7 +76,7 @@ class GlobalExceptionHandlerTest {
         var body = response.getBody();
         assertThat(body).isNotNull();
         assertThat(body.errorCode()).isEqualTo("VALIDATION_FAILED");
-        assertThat(body.validationErrors()).hasSize(2);
+        assertThat(body.validationErrors()).hasSize(1);
         assertThat(body.validationErrors().get(0).field()).isEqualTo("playlistInput");
     }
 

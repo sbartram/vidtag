@@ -27,14 +27,17 @@ public class VideoTaggingOrchestrator {
     private final YouTubeService youtubeService;
     private final RaindropService raindropService;
     private final VideoTaggingService videoTaggingService;
+    private final CollectionSelectionService collectionSelectionService;
 
     public VideoTaggingOrchestrator(
             YouTubeService youtubeService,
             RaindropService raindropService,
-            VideoTaggingService videoTaggingService) {
+            VideoTaggingService videoTaggingService,
+            CollectionSelectionService collectionSelectionService) {
         this.youtubeService = youtubeService;
         this.raindropService = raindropService;
         this.videoTaggingService = videoTaggingService;
+        this.collectionSelectionService = collectionSelectionService;
     }
 
     /**
@@ -63,16 +66,20 @@ public class VideoTaggingOrchestrator {
             String playlistId = youtubeService.extractPlaylistId(request.playlistInput());
             log.debug("Extracted playlist ID: {}", playlistId);
 
-            // Resolve collection ID
+            // AI determines collection
+            eventEmitter.accept(ProgressEvent.progress("Analyzing playlist to determine collection"));
+            String collectionTitle = collectionSelectionService.selectCollection(playlistId);
+            log.info("AI selected collection '{}' for playlist {}", collectionTitle, playlistId);
+
             eventEmitter.accept(ProgressEvent.progress(
-                String.format("Resolving collection: %s", request.raindropCollectionTitle())
+                String.format("Resolving collection: %s", collectionTitle)
             ));
 
-            Long collectionId = raindropService.resolveCollectionId(DEFAULT_USER_ID, request.raindropCollectionTitle());
+            Long collectionId = raindropService.resolveCollectionId(DEFAULT_USER_ID, collectionTitle);
             if (collectionId == null) {
-                log.warn("Collection not found: {}", request.raindropCollectionTitle());
+                log.warn("Collection not found: {}", collectionTitle);
                 eventEmitter.accept(ProgressEvent.error(
-                    String.format("Collection not found: %s", request.raindropCollectionTitle())
+                    String.format("Collection not found: %s", collectionTitle)
                 ));
                 eventEmitter.accept(ProgressEvent.completed(
                     "Processing completed with errors",

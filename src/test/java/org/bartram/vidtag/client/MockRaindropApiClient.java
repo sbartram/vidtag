@@ -72,6 +72,19 @@ public class MockRaindropApiClient {
             public void createBookmark(Long collectionId, String url, String title, List<String> tags) {
                 savedUrls.add(url);
             }
+
+            @Override
+            public List<RaindropCollection> getCollections() {
+                return List.of(
+                    new RaindropCollection(123L, "My Videos"),
+                    new RaindropCollection(456L, "Work")
+                );
+            }
+
+            @Override
+            public Long createCollection(String title) {
+                return 999L; // Return dummy ID for tests
+            }
         };
     }
 }

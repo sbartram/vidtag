@@ -49,4 +49,19 @@ public interface RaindropApiClient {
      * @throws RuntimeException if API call fails
      */
     void createBookmark(Long collectionId, String url, String title, List<String> tags);
+
+    /**
+     * Get all collections for the authenticated user.
+     *
+     * @return list of collections
+     */
+    List<RaindropCollection> getCollections();
+
+    /**
+     * Create a new collection.
+     *
+     * @param title collection title
+     * @return the ID of the created collection
+     */
+    Long createCollection(String title);
 }

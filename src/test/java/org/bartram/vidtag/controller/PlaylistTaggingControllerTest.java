@@ -58,7 +58,6 @@ class PlaylistTaggingControllerTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -77,7 +76,6 @@ class PlaylistTaggingControllerTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -93,7 +91,7 @@ class PlaylistTaggingControllerTest {
         verify(orchestrator).processPlaylist(requestCaptor.capture(), any());
         TagPlaylistRequest capturedRequest = requestCaptor.getValue();
         assertThat(capturedRequest.playlistInput()).isEqualTo("PLtest123");
-        assertThat(capturedRequest.raindropCollectionTitle()).isEqualTo("Tech Videos");
+        // Collection is now determined by AI, not passed in request
     }
 
     @Test
@@ -101,9 +99,7 @@ class PlaylistTaggingControllerTest {
         // Given
         String requestJson = """
             {
-                "playlistInput": null,
-                "raindropCollectionTitle": "Tech Videos"
-            }
+                "playlistInput": null}
             """;
 
         // When/Then
@@ -118,9 +114,7 @@ class PlaylistTaggingControllerTest {
         // Given
         String requestJson = """
             {
-                "playlistInput": "   ",
-                "raindropCollectionTitle": "Tech Videos"
-            }
+                "playlistInput": "   "}
             """;
 
         // When/Then
@@ -130,46 +124,14 @@ class PlaylistTaggingControllerTest {
             .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void tagPlaylist_shouldReturn400ForMissingCollectionTitle() throws Exception {
-        // Given
-        String requestJson = """
-            {
-                "playlistInput": "PLtest123",
-                "raindropCollectionTitle": null
-            }
-            """;
-
-        // When/Then
-        mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void tagPlaylist_shouldReturn400ForBlankCollectionTitle() throws Exception {
-        // Given
-        String requestJson = """
-            {
-                "playlistInput": "PLtest123",
-                "raindropCollectionTitle": ""
-            }
-            """;
-
-        // When/Then
-        mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isBadRequest());
-    }
+    // Tests for raindropCollectionTitle validation removed - field no longer exists
+    // Collection is now automatically determined by AI
 
     @Test
     void tagPlaylist_shouldPassEventEmitterToOrchestrator() throws Exception {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null
@@ -191,9 +153,7 @@ class PlaylistTaggingControllerTest {
         // Given
         String requestJson = """
             {
-                "playlistInput": "PLtest123",
-                "raindropCollectionTitle": "Tech Videos",
-                "filters": {
+                "playlistInput": "PLtest123","filters": {
                     "publishedAfter": "2024-01-01T00:00:00Z",
                     "maxDurationSeconds": 3600,
                     "maxVideos": 10
@@ -226,7 +186,6 @@ class PlaylistTaggingControllerTest {
         // Given
         TagPlaylistRequest request = new TagPlaylistRequest(
             "PLtest123",
-            "Tech Videos",
             null,
             null,
             null

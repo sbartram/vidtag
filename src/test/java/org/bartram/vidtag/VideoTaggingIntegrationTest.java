@@ -54,9 +54,7 @@ class VideoTaggingIntegrationTest {
     void tagPlaylist_withValidRequest_returnsOk() throws Exception {
         String requestBody = """
             {
-                "playlistInput": "PLtest123",
-                "raindropCollectionTitle": "My Videos",
-                "verbosity": "STANDARD"
+                "playlistInput": "PLtest123","verbosity": "STANDARD"
             }
             """;
 
@@ -70,9 +68,7 @@ class VideoTaggingIntegrationTest {
     void tagPlaylist_withFilters_returnsOk() throws Exception {
         String requestBody = """
             {
-                "playlistInput": "https://www.youtube.com/playlist?list=PLtest456",
-                "raindropCollectionTitle": "Work",
-                "filters": {
+                "playlistInput": "https://www.youtube.com/playlist?list=PLtest456","filters": {
                     "maxDuration": 900,
                     "maxVideos": 5
                 },
@@ -92,9 +88,7 @@ class VideoTaggingIntegrationTest {
     @Test
     void tagPlaylist_withMissingPlaylistInput_returnsBadRequest() throws Exception {
         String requestBody = """
-            {
-                "raindropCollectionTitle": "My Videos"
-            }
+            {}
             """;
 
         mockMvc.perform(post("/api/v1/playlists/tag")

@@ -49,6 +49,15 @@ vidtag:
     # Comma-separated list of tags to block from AI suggestions (empty = disabled)
     blocked-tags: ${VIDTAG_TAGGING_BLOCKED_TAGS:youtube,golf-tips,golf-instruction,golf-swing}
 
+  # Raindrop.io Configuration
+  raindrop:
+    # Fallback collection when AI confidence is low
+    fallback-collection: ${VIDTAG_RAINDROP_FALLBACK_COLLECTION:Videos}
+    # Cache TTL for playlist → collection mappings
+    collection-cache-ttl: ${VIDTAG_RAINDROP_COLLECTION_CACHE_TTL:24h}
+    # Cache TTL for user's collection list
+    collections-list-cache-ttl: ${VIDTAG_RAINDROP_COLLECTIONS_LIST_CACHE_TTL:1h}
+
 # Resilience4J Circuit Breaker Configuration
 resilience4j:
   circuitbreaker:

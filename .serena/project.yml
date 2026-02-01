@@ -1,6 +1,7 @@
 # the name by which the project can be referenced within Serena
 project_name: "vidtag"
 
+web_dashboard_open_on_launch: false
 
 # list of languages for which language servers are started; choose from:
 #   al                  bash                clojure             cpp                 csharp
@@ -27,6 +28,7 @@ project_name: "vidtag"
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
 - java
+- yaml
 
 # the encoding used by text files in the project
 # For a list of possible encodings, see https://docs.python.org/3.11/library/codecs.html#standard-encodings

@@ -50,7 +50,7 @@ vidtag:
   # Tag Filtering Configuration
   tagging:
     # Comma-separated list of tags to block from AI suggestions (empty = disabled)
-    blocked-tags: ${VIDTAG_TAGGING_BLOCKED_TAGS:youtube,golf-tips,golf-instruction,golf-swing}
+    blocked-tags: ${VIDTAG_TAGGING_BLOCKED_TAGS:youtube,golf-tips,golf-instruction,golf-swing,swing-analysis,online-coaching,pga-instruction
 
   # Raindrop.io Configuration
   raindrop:

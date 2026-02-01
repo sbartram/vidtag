@@ -15,11 +15,8 @@ import org.bartram.vidtag.model.VideoFilters;
  * @param verbosity verbosity level for processing output
  */
 public record TagPlaylistRequest(
-    @NotBlank(message = "playlistInput is required")
-    String playlistInput,
-    // raindropCollectionTitle REMOVED - AI determines collection
-    VideoFilters filters,
-    TagStrategy tagStrategy,
-    Verbosity verbosity
-) {
-}
+        @NotBlank(message = "playlistInput is required") String playlistInput,
+        // raindropCollectionTitle REMOVED - AI determines collection
+        VideoFilters filters,
+        TagStrategy tagStrategy,
+        Verbosity verbosity) {}

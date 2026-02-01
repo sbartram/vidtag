@@ -8,7 +8,4 @@ import java.io.Serializable;
  *
  * @param name the tag name
  */
-public record RaindropTag(
-    String name
-) implements Serializable {
-}
+public record RaindropTag(String name) implements Serializable {}

@@ -1,5 +1,9 @@
 package org.bartram.vidtag.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
@@ -7,11 +11,6 @@ import org.bartram.vidtag.event.ProgressEvent;
 import org.bartram.vidtag.model.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Orchestrates the video tagging workflow: YouTube -> Raindrop collection resolution -> AI tagging -> bookmark saving.
@@ -48,9 +47,8 @@ public class VideoTaggingOrchestrator {
 
         try {
             // Emit started event
-            eventEmitter.accept(ProgressEvent.started(
-                String.format("Processing playlist: %s", request.playlistInput())
-            ));
+            eventEmitter.accept(
+                    ProgressEvent.started(String.format("Processing playlist: %s", request.playlistInput())));
 
             // Extract playlist ID
             String playlistId = youtubeService.extractPlaylistId(request.playlistInput());
@@ -61,20 +59,14 @@ public class VideoTaggingOrchestrator {
             String collectionTitle = collectionSelectionService.selectCollection(playlistId);
             log.info("AI selected collection '{}' for playlist {}", collectionTitle, playlistId);
 
-            eventEmitter.accept(ProgressEvent.progress(
-                String.format("Resolving collection: %s", collectionTitle)
-            ));
+            eventEmitter.accept(ProgressEvent.progress(String.format("Resolving collection: %s", collectionTitle)));
 
             Long collectionId = raindropService.resolveCollectionId(DEFAULT_USER_ID, collectionTitle);
             if (collectionId == null) {
                 log.warn("Collection not found: {}", collectionTitle);
-                eventEmitter.accept(ProgressEvent.error(
-                    String.format("Collection not found: %s", collectionTitle)
-                ));
-                eventEmitter.accept(ProgressEvent.completed(
-                    "Processing completed with errors",
-                    new ProcessingSummary(0, 0, 0, 0)
-                ));
+                eventEmitter.accept(ProgressEvent.error(String.format("Collection not found: %s", collectionTitle)));
+                eventEmitter.accept(
+                        ProgressEvent.completed("Processing completed with errors", new ProcessingSummary(0, 0, 0, 0)));
                 return;
             }
             log.debug("Resolved collection ID: {}", collectionId);
@@ -90,15 +82,10 @@ public class VideoTaggingOrchestrator {
             totalVideos = videos.size();
             log.info("Fetched {} videos from playlist {}", totalVideos, playlistId);
 
-            eventEmitter.accept(ProgressEvent.progress(
-                String.format("Found %d videos to process", totalVideos)
-            ));
+            eventEmitter.accept(ProgressEvent.progress(String.format("Found %d videos to process", totalVideos)));
 
             if (videos.isEmpty()) {
-                eventEmitter.accept(ProgressEvent.completed(
-                    "No videos to process",
-                    new ProcessingSummary(0, 0, 0, 0)
-                ));
+                eventEmitter.accept(ProgressEvent.completed("No videos to process", new ProcessingSummary(0, 0, 0, 0)));
                 return;
             }
 
@@ -115,9 +102,8 @@ public class VideoTaggingOrchestrator {
                 log.debug("Processing batch {}/{} ({} videos)", batchNumber, batches.size(), batch.size());
 
                 for (VideoMetadata video : batch) {
-                    VideoProcessingResult result = processVideo(
-                        video, collectionId, existingTags, request.tagStrategy(), eventEmitter
-                    );
+                    VideoProcessingResult result =
+                            processVideo(video, collectionId, existingTags, request.tagStrategy(), eventEmitter);
 
                     switch (result.status()) {
                         case SUCCESS -> {
@@ -137,10 +123,10 @@ public class VideoTaggingOrchestrator {
 
                 // Emit batch completed event
                 eventEmitter.accept(ProgressEvent.batchCompleted(
-                    String.format("Batch %d/%d completed: %d succeeded, %d skipped, %d failed",
-                        batchNumber, batches.size(), batchSucceeded, batchSkipped, batchFailed),
-                    new BatchStats(batchNumber, batches.size(), batchSucceeded, batchSkipped, batchFailed)
-                ));
+                        String.format(
+                                "Batch %d/%d completed: %d succeeded, %d skipped, %d failed",
+                                batchNumber, batches.size(), batchSucceeded, batchSkipped, batchFailed),
+                        new BatchStats(batchNumber, batches.size(), batchSucceeded, batchSkipped, batchFailed)));
             }
 
         } catch (Exception e) {
@@ -151,10 +137,8 @@ public class VideoTaggingOrchestrator {
         // Build and emit final summary
         ProcessingSummary summary = buildSummary(totalVideos, succeeded, skipped, failed);
         eventEmitter.accept(ProgressEvent.completed(
-            String.format("Processing complete: %d succeeded, %d skipped, %d failed",
-                succeeded, skipped, failed),
-            summary
-        ));
+                String.format("Processing complete: %d succeeded, %d skipped, %d failed", succeeded, skipped, failed),
+                summary));
 
         log.info("Playlist processing completed: {}", summary);
     }
@@ -184,40 +168,28 @@ public class VideoTaggingOrchestrator {
                 log.debug("Video already exists in collection, skipping: {}", video.videoId());
 
                 VideoProcessingResult result = new VideoProcessingResult(
-                    video,
-                    Collections.emptyList(),
-                    ProcessingStatus.SKIPPED,
-                    "Bookmark already exists in collection"
-                );
+                        video,
+                        Collections.emptyList(),
+                        ProcessingStatus.SKIPPED,
+                        "Bookmark already exists in collection");
 
                 eventEmitter.accept(ProgressEvent.videoSkipped(
-                    String.format("Skipped '%s' - already exists in collection", video.title()),
-                    result
-                ));
+                        String.format("Skipped '%s' - already exists in collection", video.title()), result));
 
                 return result;
             }
 
             // Generate tags using AI
             List<TagWithConfidence> tags = videoTaggingService.generateTags(video, existingTags, tagStrategy);
-            List<String> tagNames = tags.stream()
-                .map(TagWithConfidence::tag)
-                .toList();
+            List<String> tagNames = tags.stream().map(TagWithConfidence::tag).toList();
 
             // Create bookmark in Raindrop
             raindropService.createBookmark(collectionId, video.url(), video.title(), tagNames);
 
-            VideoProcessingResult result = new VideoProcessingResult(
-                video,
-                tags,
-                ProcessingStatus.SUCCESS,
-                null
-            );
+            VideoProcessingResult result = new VideoProcessingResult(video, tags, ProcessingStatus.SUCCESS, null);
 
             eventEmitter.accept(ProgressEvent.videoCompleted(
-                String.format("Tagged '%s' with %d tags", video.title(), tags.size()),
-                result
-            ));
+                    String.format("Tagged '%s' with %d tags", video.title(), tags.size()), result));
 
             log.info("Successfully processed video: {} with {} tags", video.videoId(), tags.size());
             return result;
@@ -225,17 +197,11 @@ public class VideoTaggingOrchestrator {
         } catch (Exception e) {
             log.error("Failed to process video {}: {}", video.videoId(), e.getMessage(), e);
 
-            VideoProcessingResult result = new VideoProcessingResult(
-                video,
-                Collections.emptyList(),
-                ProcessingStatus.FAILED,
-                e.getMessage()
-            );
+            VideoProcessingResult result =
+                    new VideoProcessingResult(video, Collections.emptyList(), ProcessingStatus.FAILED, e.getMessage());
 
             eventEmitter.accept(ProgressEvent.error(
-                String.format("Failed to process video '%s': %s", video.title(), e.getMessage()),
-                result
-            ));
+                    String.format("Failed to process video '%s': %s", video.title(), e.getMessage()), result));
 
             return result;
         }
@@ -270,11 +236,5 @@ public class VideoTaggingOrchestrator {
     /**
      * Statistics for a processed batch.
      */
-    public record BatchStats(
-        int batchNumber,
-        int totalBatches,
-        int succeeded,
-        int skipped,
-        int failed
-    ) {}
+    public record BatchStats(int batchNumber, int totalBatches, int succeeded, int skipped, int failed) {}
 }

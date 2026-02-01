@@ -1,5 +1,7 @@
 package org.bartram.vidtag.service;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.SchedulerProperties;
@@ -10,9 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Scheduled service that processes a YouTube playlist at fixed intervals.
@@ -35,9 +34,9 @@ public class PlaylistProcessingScheduler {
      * Processes playlists sequentially. Individual playlist errors are logged but do not stop execution.
      */
     @Scheduled(
-        fixedDelayString = "#{${vidtag.scheduler.fixed-delay-hours} * 60 * 60 * 1000}",
-        initialDelayString = "#{10 * 1000}"  // 10 second initial delay
-    )
+            fixedDelayString = "#{${vidtag.scheduler.fixed-delay-hours} * 60 * 60 * 1000}",
+            initialDelayString = "#{10 * 1000}" // 10 second initial delay
+            )
     public void processTagPlaylist() {
         if (!schedulerProperties.isEnabled()) {
             log.debug("Scheduler is disabled, skipping execution");
@@ -53,9 +52,9 @@ public class PlaylistProcessingScheduler {
 
         // Parse comma-separated playlist IDs
         List<String> playlistIds = Arrays.stream(playlistIdsConfig.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
 
         if (playlistIds.isEmpty()) {
             log.error("Scheduler configured but no valid playlist IDs found after parsing: '{}'", playlistIdsConfig);
@@ -79,11 +78,7 @@ public class PlaylistProcessingScheduler {
                 // Create request with default settings
                 // Collection is automatically determined by AI
                 TagPlaylistRequest request = new TagPlaylistRequest(
-                    playlistId,
-                    new VideoFilters(null, null, null),
-                    TagStrategy.SUGGEST,
-                    null
-                );
+                        playlistId, new VideoFilters(null, null, null), TagStrategy.SUGGEST, null);
 
                 // Process playlist asynchronously (orchestrator handles SSE events)
                 orchestrator.processPlaylist(request, event -> {
@@ -101,7 +96,10 @@ public class PlaylistProcessingScheduler {
             }
         }
 
-        log.info("Completed scheduled processing: {} total, {} succeeded, {} failed",
-            totalCount, successCount, failureCount);
+        log.info(
+                "Completed scheduled processing: {} total, {} succeeded, {} failed",
+                totalCount,
+                successCount,
+                failureCount);
     }
 }

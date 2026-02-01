@@ -1,31 +1,28 @@
 package org.bartram.vidtag.dto.error;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ValidationErrorResponseTest {
 
     @Test
     void shouldCreateValidationErrorResponse() {
         var fieldErrors = List.of(
-            new ValidationErrorResponse.FieldError("email", "Email is required"),
-            new ValidationErrorResponse.FieldError("name", "Name must not be blank")
-        );
+                new ValidationErrorResponse.FieldError("email", "Email is required"),
+                new ValidationErrorResponse.FieldError("name", "Name must not be blank"));
 
         var response = new ValidationErrorResponse(
-            "VALIDATION_FAILED",
-            "Request validation failed",
-            400,
-            Instant.now(),
-            "req-456",
-            "/api/test",
-            fieldErrors,
-            null
-        );
+                "VALIDATION_FAILED",
+                "Request validation failed",
+                400,
+                Instant.now(),
+                "req-456",
+                "/api/test",
+                fieldErrors,
+                null);
 
         assertThat(response.errorCode()).isEqualTo("VALIDATION_FAILED");
         assertThat(response.status()).isEqualTo(400);

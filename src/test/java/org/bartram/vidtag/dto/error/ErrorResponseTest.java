@@ -1,10 +1,9 @@
 package org.bartram.vidtag.dto.error;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ErrorResponseTest {
 
@@ -13,15 +12,8 @@ class ErrorResponseTest {
         var timestamp = Instant.now();
         var debugInfo = new DebugInfo("RuntimeException", "stack trace here", null);
 
-        var response = new ErrorResponse(
-            "TEST_ERROR",
-            "Test message",
-            400,
-            timestamp,
-            "req-123",
-            "/api/test",
-            debugInfo
-        );
+        var response =
+                new ErrorResponse("TEST_ERROR", "Test message", 400, timestamp, "req-123", "/api/test", debugInfo);
 
         assertThat(response.errorCode()).isEqualTo("TEST_ERROR");
         assertThat(response.message()).isEqualTo("Test message");
@@ -34,13 +26,7 @@ class ErrorResponseTest {
 
     @Test
     void shouldCreateErrorResponseWithoutDebugInfo() {
-        var response = ErrorResponse.of(
-            "TEST_ERROR",
-            "Test message",
-            400,
-            "req-123",
-            "/api/test"
-        );
+        var response = ErrorResponse.of("TEST_ERROR", "Test message", 400, "req-123", "/api/test");
 
         assertThat(response.errorCode()).isEqualTo("TEST_ERROR");
         assertThat(response.message()).isEqualTo("Test message");

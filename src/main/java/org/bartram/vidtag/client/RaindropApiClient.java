@@ -1,9 +1,8 @@
 package org.bartram.vidtag.client;
 
+import java.util.List;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
-
-import java.util.List;
 
 /**
  * Client interface for interacting with Raindrop.io API.

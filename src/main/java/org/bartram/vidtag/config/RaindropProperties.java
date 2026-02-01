@@ -1,9 +1,8 @@
 package org.bartram.vidtag.config;
 
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
 
 /**
  * Configuration properties for Raindrop.io integration.

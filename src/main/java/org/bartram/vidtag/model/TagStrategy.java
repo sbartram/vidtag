@@ -9,11 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @param confidenceThreshold minimum confidence score for tags (optional)
  * @param customInstructions custom instructions for tag generation (optional)
  */
-public record TagStrategy(
-    Integer maxTagsPerVideo,
-    Double confidenceThreshold,
-    String customInstructions
-) {
+public record TagStrategy(Integer maxTagsPerVideo, Double confidenceThreshold, String customInstructions) {
     /**
      * Default strategy for tag suggestions with reasonable defaults.
      */

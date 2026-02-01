@@ -10,8 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class VidtagApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(VidtagApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(VidtagApplication.class, args);
+    }
 }

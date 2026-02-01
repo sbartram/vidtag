@@ -27,8 +27,7 @@ public class ExternalServiceException extends VidtagException {
 
     public Map<String, Object> getServiceInfo() {
         return Map.of(
-            "service", serviceName,
-            "retryAfter", retryAfterSeconds
-        );
+                "service", serviceName,
+                "retryAfter", retryAfterSeconds);
     }
 }

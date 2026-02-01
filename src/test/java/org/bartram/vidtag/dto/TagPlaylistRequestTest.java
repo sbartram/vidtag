@@ -1,13 +1,12 @@
 package org.bartram.vidtag.dto;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Instant;
 import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.Verbosity;
 import org.bartram.vidtag.model.VideoFilters;
 import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TagPlaylistRequestTest {
 
@@ -15,25 +14,12 @@ class TagPlaylistRequestTest {
     void testValidRequestCreation() {
         // Given
         String playlistInput = "PLtest123";
-        VideoFilters filters = new VideoFilters(
-            Instant.parse("2024-01-01T00:00:00Z"),
-            3600,
-            100
-        );
-        TagStrategy tagStrategy = new TagStrategy(
-            5,
-            0.7,
-            "Focus on technical content"
-        );
+        VideoFilters filters = new VideoFilters(Instant.parse("2024-01-01T00:00:00Z"), 3600, 100);
+        TagStrategy tagStrategy = new TagStrategy(5, 0.7, "Focus on technical content");
         Verbosity verbosity = Verbosity.STANDARD;
 
         // When
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            playlistInput,
-            filters,
-            tagStrategy,
-            verbosity
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest(playlistInput, filters, tagStrategy, verbosity);
 
         // Then
         assertNotNull(request);
@@ -51,12 +37,7 @@ class TagPlaylistRequestTest {
         Verbosity verbosity = Verbosity.STANDARD;
 
         // When
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            playlistInput,
-            null,
-            tagStrategy,
-            verbosity
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest(playlistInput, null, tagStrategy, verbosity);
 
         // Then
         assertNotNull(request);
@@ -71,12 +52,7 @@ class TagPlaylistRequestTest {
         Verbosity verbosity = Verbosity.MINIMAL;
 
         // When
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            playlistInput,
-            filters,
-            null,
-            verbosity
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest(playlistInput, filters, null, verbosity);
 
         // Then
         assertNotNull(request);
@@ -90,19 +66,9 @@ class TagPlaylistRequestTest {
         VideoFilters filters = new VideoFilters(null, null, null);
         Verbosity verbosity = Verbosity.DETAILED;
 
-        TagPlaylistRequest request1 = new TagPlaylistRequest(
-            "PLtest123",
-            filters,
-            tagStrategy,
-            verbosity
-        );
+        TagPlaylistRequest request1 = new TagPlaylistRequest("PLtest123", filters, tagStrategy, verbosity);
 
-        TagPlaylistRequest request2 = new TagPlaylistRequest(
-            "PLtest123",
-            filters,
-            tagStrategy,
-            verbosity
-        );
+        TagPlaylistRequest request2 = new TagPlaylistRequest("PLtest123", filters, tagStrategy, verbosity);
 
         // Then
         assertEquals(request1, request2);

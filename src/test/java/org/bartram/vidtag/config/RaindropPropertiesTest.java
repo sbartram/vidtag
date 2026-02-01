@@ -1,5 +1,8 @@
 package org.bartram.vidtag.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Duration;
 import org.bartram.vidtag.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,17 +10,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
-@TestPropertySource(properties = {
-    "vidtag.raindrop.fallback-collection=TestCollection",
-    "vidtag.raindrop.collection-cache-ttl=48h",
-    "vidtag.raindrop.collections-list-cache-ttl=2h"
-})
+@TestPropertySource(
+        properties = {
+            "vidtag.raindrop.fallback-collection=TestCollection",
+            "vidtag.raindrop.collection-cache-ttl=48h",
+            "vidtag.raindrop.collections-list-cache-ttl=2h"
+        })
 class RaindropPropertiesTest {
 
     @Autowired

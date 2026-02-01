@@ -7,11 +7,7 @@ package org.bartram.vidtag.event;
  * @param message human-readable message describing the event
  * @param data additional event data (e.g., VideoProcessingResult, ProcessingSummary)
  */
-public record ProgressEvent(
-    String eventType,
-    String message,
-    Object data
-) {
+public record ProgressEvent(String eventType, String message, Object data) {
 
     /**
      * Creates a "started" event indicating processing has begun.

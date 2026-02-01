@@ -1,5 +1,9 @@
 package org.bartram.vidtag.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
 import org.bartram.vidtag.client.YouTubeApiClient;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -7,11 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class YouTubeServicePlaylistSearchTest {
@@ -36,7 +35,7 @@ class YouTubeServicePlaylistSearchTest {
         when(youtubeApiClient.findPlaylistByName("nonexistent")).thenReturn(null);
 
         assertThatThrownBy(() -> youtubeService.findPlaylistByName("nonexistent"))
-            .isInstanceOf(ResourceNotFoundException.class)
-            .hasMessageContaining("Playlist not found: nonexistent");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Playlist not found: nonexistent");
     }
 }

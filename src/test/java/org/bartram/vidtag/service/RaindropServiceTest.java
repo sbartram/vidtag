@@ -1,7 +1,11 @@
 package org.bartram.vidtag.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
 import org.bartram.vidtag.client.RaindropApiClient;
-import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
@@ -10,12 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RaindropServiceTest {
@@ -34,11 +32,8 @@ class RaindropServiceTest {
     void getUserTags_shouldReturnTags() {
         // Given
         String userId = "user123";
-        List<RaindropTag> expectedTags = List.of(
-            new RaindropTag("java"),
-            new RaindropTag("spring"),
-            new RaindropTag("tutorial")
-        );
+        List<RaindropTag> expectedTags =
+                List.of(new RaindropTag("java"), new RaindropTag("spring"), new RaindropTag("tutorial"));
         when(raindropApiClient.getUserTags(userId)).thenReturn(expectedTags);
 
         // When
@@ -71,12 +66,10 @@ class RaindropServiceTest {
     void getUserTags_shouldThrowExceptionOnFailure() {
         // Given
         String userId = "user123";
-        when(raindropApiClient.getUserTags(userId))
-            .thenThrow(new RuntimeException("API error"));
+        when(raindropApiClient.getUserTags(userId)).thenThrow(new RuntimeException("API error"));
 
         // When/Then
-        assertThatThrownBy(() -> raindropService.getUserTags(userId))
-            .isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> raindropService.getUserTags(userId)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
@@ -85,10 +78,9 @@ class RaindropServiceTest {
         String userId = "user123";
         String targetTitle = "My Collection";
         List<RaindropCollection> collections = List.of(
-            new RaindropCollection(1L, "Other Collection"),
-            new RaindropCollection(2L, "My Collection"),
-            new RaindropCollection(3L, "Another Collection")
-        );
+                new RaindropCollection(1L, "Other Collection"),
+                new RaindropCollection(2L, "My Collection"),
+                new RaindropCollection(3L, "Another Collection"));
         when(raindropApiClient.getUserCollections(userId)).thenReturn(collections);
 
         // When
@@ -102,9 +94,7 @@ class RaindropServiceTest {
     void resolveCollectionId_shouldBeCaseInsensitive() {
         // Given
         String userId = "user123";
-        List<RaindropCollection> collections = List.of(
-            new RaindropCollection(1L, "My Collection")
-        );
+        List<RaindropCollection> collections = List.of(new RaindropCollection(1L, "My Collection"));
         when(raindropApiClient.getUserCollections(userId)).thenReturn(collections);
 
         // When
@@ -118,27 +108,24 @@ class RaindropServiceTest {
     void resolveCollectionId_shouldThrowResourceNotFoundExceptionWhenNotFound() {
         // Given
         String userId = "user123";
-        List<RaindropCollection> collections = List.of(
-            new RaindropCollection(1L, "Other Collection")
-        );
+        List<RaindropCollection> collections = List.of(new RaindropCollection(1L, "Other Collection"));
         when(raindropApiClient.getUserCollections(userId)).thenReturn(collections);
 
         // When/Then
         assertThatThrownBy(() -> raindropService.resolveCollectionId(userId, "Non-existent"))
-            .isInstanceOf(ResourceNotFoundException.class)
-            .hasMessageContaining("Collection 'Non-existent' not found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Collection 'Non-existent' not found");
     }
 
     @Test
     void resolveCollectionId_shouldThrowExceptionOnFailure() {
         // Given
         String userId = "user123";
-        when(raindropApiClient.getUserCollections(userId))
-            .thenThrow(new RuntimeException("API error"));
+        when(raindropApiClient.getUserCollections(userId)).thenThrow(new RuntimeException("API error"));
 
         // When/Then
         assertThatThrownBy(() -> raindropService.resolveCollectionId(userId, "Any Title"))
-            .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
@@ -174,12 +161,11 @@ class RaindropServiceTest {
         // Given
         Long collectionId = 123L;
         String url = "https://example.com/video";
-        when(raindropApiClient.bookmarkExists(collectionId, url))
-            .thenThrow(new RuntimeException("API error"));
+        when(raindropApiClient.bookmarkExists(collectionId, url)).thenThrow(new RuntimeException("API error"));
 
         // When/Then
         assertThatThrownBy(() -> raindropService.bookmarkExists(collectionId, url))
-            .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
@@ -205,21 +191,21 @@ class RaindropServiceTest {
         String title = "Test Video";
         List<String> tags = List.of("java");
         doThrow(new RuntimeException("API error"))
-            .when(raindropApiClient).createBookmark(collectionId, url, title, tags);
+                .when(raindropApiClient)
+                .createBookmark(collectionId, url, title, tags);
 
         // When/Then
         assertThatThrownBy(() -> raindropService.createBookmark(collectionId, url, title, tags))
-            .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
     void getUserCollections_shouldReturnCollectionTitles() {
         // Arrange
         List<RaindropCollection> collections = List.of(
-            new RaindropCollection(1L, "Technology"),
-            new RaindropCollection(2L, "Cooking"),
-            new RaindropCollection(3L, "Travel")
-        );
+                new RaindropCollection(1L, "Technology"),
+                new RaindropCollection(2L, "Cooking"),
+                new RaindropCollection(3L, "Travel"));
         when(raindropApiClient.getCollections()).thenReturn(collections);
 
         // Act
@@ -233,9 +219,7 @@ class RaindropServiceTest {
     @Test
     void getUserCollections_shouldBeCached() {
         // Arrange
-        List<RaindropCollection> collections = List.of(
-            new RaindropCollection(1L, "Technology")
-        );
+        List<RaindropCollection> collections = List.of(new RaindropCollection(1L, "Technology"));
         when(raindropApiClient.getCollections()).thenReturn(collections);
 
         // Act - call twice

@@ -8,10 +8,4 @@ package org.bartram.vidtag.model;
  * @param skipped number of skipped videos
  * @param failed number of failed videos
  */
-public record ProcessingSummary(
-    Integer totalVideos,
-    Integer succeeded,
-    Integer skipped,
-    Integer failed
-) {
-}
+public record ProcessingSummary(Integer totalVideos, Integer succeeded, Integer skipped, Integer failed) {}

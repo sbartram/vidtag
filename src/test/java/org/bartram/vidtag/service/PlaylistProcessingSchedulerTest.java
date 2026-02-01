@@ -1,5 +1,9 @@
 package org.bartram.vidtag.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import org.bartram.vidtag.config.SchedulerProperties;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.model.TagStrategy;
@@ -10,10 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlaylistProcessingSchedulerTest {
@@ -34,11 +34,7 @@ class PlaylistProcessingSchedulerTest {
 
     @BeforeEach
     void setUp() {
-        scheduler = new PlaylistProcessingScheduler(
-            youtubeService,
-            orchestrator,
-            schedulerProperties
-        );
+        scheduler = new PlaylistProcessingScheduler(youtubeService, orchestrator, schedulerProperties);
     }
 
     @Test
@@ -71,8 +67,7 @@ class PlaylistProcessingSchedulerTest {
     void shouldContinueOnException() {
         when(schedulerProperties.isEnabled()).thenReturn(true);
         when(schedulerProperties.getPlaylistIds()).thenReturn("PLxyz123");
-        doThrow(new RuntimeException("API error"))
-            .when(orchestrator).processPlaylist(any(), any());
+        doThrow(new RuntimeException("API error")).when(orchestrator).processPlaylist(any(), any());
 
         // Should not throw exception
         scheduler.processTagPlaylist();
@@ -136,9 +131,10 @@ class PlaylistProcessingSchedulerTest {
 
         // Throw exception only for the second playlist
         doNothing()
-            .doThrow(new RuntimeException("API error"))
-            .doNothing()
-            .when(orchestrator).processPlaylist(any(), any());
+                .doThrow(new RuntimeException("API error"))
+                .doNothing()
+                .when(orchestrator)
+                .processPlaylist(any(), any());
 
         scheduler.processTagPlaylist();
 

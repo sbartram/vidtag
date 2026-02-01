@@ -9,9 +9,4 @@ import java.time.Instant;
  * @param maxDuration maximum video duration in seconds (optional)
  * @param maxVideos maximum number of videos to process (optional)
  */
-public record VideoFilters(
-    Instant publishedAfter,
-    Integer maxDuration,
-    Integer maxVideos
-) {
-}
+public record VideoFilters(Instant publishedAfter, Integer maxDuration, Integer maxVideos) {}

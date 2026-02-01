@@ -1,8 +1,8 @@
 package org.bartram.vidtag.exception;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 class DataParsingExceptionTest {
 

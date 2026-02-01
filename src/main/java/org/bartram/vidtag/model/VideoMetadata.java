@@ -13,11 +13,4 @@ import java.time.Instant;
  * @param duration video duration in seconds (optional)
  */
 public record VideoMetadata(
-    String videoId,
-    String url,
-    String title,
-    String description,
-    Instant publishedAt,
-    Integer duration
-) {
-}
+        String videoId, String url, String title, String description, Instant publishedAt, Integer duration) {}

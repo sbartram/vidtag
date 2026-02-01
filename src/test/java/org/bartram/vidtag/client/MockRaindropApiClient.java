@@ -1,14 +1,13 @@
 package org.bartram.vidtag.client;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Test configuration providing a mock RaindropApiClient for integration tests.
@@ -48,19 +47,15 @@ public class MockRaindropApiClient {
             @Override
             public List<RaindropTag> getUserTags(String userId) {
                 return List.of(
-                    new RaindropTag("java"),
-                    new RaindropTag("spring"),
-                    new RaindropTag("tutorial"),
-                    new RaindropTag("programming")
-                );
+                        new RaindropTag("java"),
+                        new RaindropTag("spring"),
+                        new RaindropTag("tutorial"),
+                        new RaindropTag("programming"));
             }
 
             @Override
             public List<RaindropCollection> getUserCollections(String userId) {
-                return List.of(
-                    new RaindropCollection(123L, "My Videos"),
-                    new RaindropCollection(456L, "Work")
-                );
+                return List.of(new RaindropCollection(123L, "My Videos"), new RaindropCollection(456L, "Work"));
             }
 
             @Override
@@ -75,10 +70,7 @@ public class MockRaindropApiClient {
 
             @Override
             public List<RaindropCollection> getCollections() {
-                return List.of(
-                    new RaindropCollection(123L, "My Videos"),
-                    new RaindropCollection(456L, "Work")
-                );
+                return List.of(new RaindropCollection(123L, "My Videos"), new RaindropCollection(456L, "Work"));
             }
 
             @Override

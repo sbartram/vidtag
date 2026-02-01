@@ -7,9 +7,7 @@ package org.bartram.vidtag.exception;
 public class ResourceNotFoundException extends VidtagException {
 
     public ResourceNotFoundException(String resource, String identifier) {
-        super("RESOURCE_NOT_FOUND",
-              String.format("%s '%s' not found", resource, identifier),
-              404);
+        super("RESOURCE_NOT_FOUND", String.format("%s '%s' not found", resource, identifier), 404);
     }
 
     public ResourceNotFoundException(String message) {

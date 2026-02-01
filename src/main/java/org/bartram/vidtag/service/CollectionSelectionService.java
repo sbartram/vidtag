@@ -1,5 +1,6 @@
 package org.bartram.vidtag.service;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.RaindropProperties;
 import org.bartram.vidtag.model.VideoMetadata;
@@ -7,8 +8,6 @@ import org.bartram.vidtag.service.YouTubeService.PlaylistMetadata;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Service for AI-powered collection selection.
@@ -102,9 +101,7 @@ public class CollectionSelectionService {
     }
 
     private String askAIForCollection(
-            List<String> availableCollections,
-            PlaylistMetadata metadata,
-            List<VideoMetadata> sampleVideos) {
+            List<String> availableCollections, PlaylistMetadata metadata, List<VideoMetadata> sampleVideos) {
 
         String prompt = buildPrompt(availableCollections, metadata, sampleVideos);
         log.debug("Asking AI to select collection");
@@ -119,9 +116,7 @@ public class CollectionSelectionService {
     }
 
     private String buildPrompt(
-            List<String> availableCollections,
-            PlaylistMetadata metadata,
-            List<VideoMetadata> sampleVideos) {
+            List<String> availableCollections, PlaylistMetadata metadata, List<VideoMetadata> sampleVideos) {
 
         StringBuilder prompt = new StringBuilder();
         prompt.append("You are helping categorize YouTube videos into Raindrop.io collections.\n\n");
@@ -143,7 +138,8 @@ public class CollectionSelectionService {
             prompt.append(count++).append(". ").append(video.title()).append("\n");
         }
 
-        prompt.append("\nChoose the most appropriate collection from the available collections above for this playlist.\n\n");
+        prompt.append(
+                "\nChoose the most appropriate collection from the available collections above for this playlist.\n\n");
         prompt.append("Rules:\n");
         prompt.append("- Respond with ONLY the exact collection name from the list\n");
         prompt.append("- If none of the collections are a good fit, respond with exactly \"LOW_CONFIDENCE\"\n");

@@ -1,6 +1,11 @@
 package org.bartram.vidtag.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.bartram.vidtag.dto.error.DebugInfo;
@@ -13,12 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Global exception handler for all REST controllers.
@@ -39,28 +38,24 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidation(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        List<ValidationErrorResponse.FieldError> fieldErrors = ex.getBindingResult()
-            .getFieldErrors()
-            .stream()
-            .map(fe -> new ValidationErrorResponse.FieldError(fe.getField(), fe.getDefaultMessage()))
-            .toList();
+        List<ValidationErrorResponse.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> new ValidationErrorResponse.FieldError(fe.getField(), fe.getDefaultMessage()))
+                .toList();
 
         String requestId = generateRequestId();
         log.warn("Validation failed [requestId={}]: {}", requestId, fieldErrors);
 
         ValidationErrorResponse response = new ValidationErrorResponse(
-            "VALIDATION_FAILED",
-            "Request validation failed",
-            400,
-            Instant.now(),
-            requestId,
-            request.getRequestURI(),
-            fieldErrors,
-            buildDebugInfo(ex, request, null)
-        );
+                "VALIDATION_FAILED",
+                "Request validation failed",
+                400,
+                Instant.now(),
+                requestId,
+                request.getRequestURI(),
+                fieldErrors,
+                buildDebugInfo(ex, request, null));
 
         return ResponseEntity.status(400).body(response);
     }
@@ -69,21 +64,18 @@ public class GlobalExceptionHandler {
      * Handle custom VidTag business exceptions.
      */
     @ExceptionHandler(VidtagException.class)
-    public ResponseEntity<ErrorResponse> handleVidtagException(
-            VidtagException ex,
-            HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleVidtagException(VidtagException ex, HttpServletRequest request) {
 
         String requestId = generateRequestId();
 
         ErrorResponse response = new ErrorResponse(
-            ex.getErrorCode(),
-            ex.getMessage(),
-            ex.getHttpStatus(),
-            Instant.now(),
-            requestId,
-            request.getRequestURI(),
-            buildDebugInfo(ex, request, null)
-        );
+                ex.getErrorCode(),
+                ex.getMessage(),
+                ex.getHttpStatus(),
+                Instant.now(),
+                requestId,
+                request.getRequestURI(),
+                buildDebugInfo(ex, request, null));
 
         // Log appropriately based on status
         if (ex.getHttpStatus() >= 500) {
@@ -100,47 +92,42 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ExternalServiceException.class)
     public ResponseEntity<ErrorResponse> handleExternalServiceException(
-            ExternalServiceException ex,
-            HttpServletRequest request) {
+            ExternalServiceException ex, HttpServletRequest request) {
 
         String requestId = generateRequestId();
         log.error("External service unavailable [requestId={}]: {}", requestId, ex.getMessage(), ex);
 
         ErrorResponse response = new ErrorResponse(
-            ex.getErrorCode(),
-            ex.getMessage(),
-            503,
-            Instant.now(),
-            requestId,
-            request.getRequestURI(),
-            buildDebugInfo(ex, request, ex.getServiceInfo())
-        );
+                ex.getErrorCode(),
+                ex.getMessage(),
+                503,
+                Instant.now(),
+                requestId,
+                request.getRequestURI(),
+                buildDebugInfo(ex, request, ex.getServiceInfo()));
 
         return ResponseEntity.status(503)
-            .header("Retry-After", ex.getRetryAfterSeconds().toString())
-            .body(response);
+                .header("Retry-After", ex.getRetryAfterSeconds().toString())
+                .body(response);
     }
 
     /**
      * Handle all other unexpected exceptions.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex,
-            HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
 
         String requestId = generateRequestId();
         log.error("Unexpected error [requestId={}]", requestId, ex);
 
         ErrorResponse response = new ErrorResponse(
-            "INTERNAL_ERROR",
-            "An unexpected error occurred",
-            500,
-            Instant.now(),
-            requestId,
-            request.getRequestURI(),
-            buildDebugInfo(ex, request, null)
-        );
+                "INTERNAL_ERROR",
+                "An unexpected error occurred",
+                500,
+                Instant.now(),
+                requestId,
+                request.getRequestURI(),
+                buildDebugInfo(ex, request, null));
 
         return ResponseEntity.status(500).body(response);
     }
@@ -163,11 +150,7 @@ public class GlobalExceptionHandler {
             stackTrace = stackTrace.substring(0, maxStackTraceLength) + "\n... (truncated)";
         }
 
-        return new DebugInfo(
-            ex.getClass().getName(),
-            stackTrace,
-            context
-        );
+        return new DebugInfo(ex.getClass().getName(), stackTrace, context);
     }
 
     private String generateRequestId() {

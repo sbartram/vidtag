@@ -1,12 +1,11 @@
 package org.bartram.vidtag.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "vidtag.tagging")
@@ -27,10 +26,10 @@ public class TagFilterProperties {
             return Collections.emptySet();
         }
         return Arrays.stream(blockedTags.split(","))
-            .map(String::trim)
-            .map(String::toLowerCase)
-            .filter(tag -> !tag.isEmpty())
-            .collect(Collectors.toSet());
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(tag -> !tag.isEmpty())
+                .collect(Collectors.toSet());
     }
 
     public boolean isFilterEnabled() {

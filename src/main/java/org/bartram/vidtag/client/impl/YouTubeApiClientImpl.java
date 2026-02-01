@@ -8,6 +8,11 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.PlaylistListResponse;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.YouTubeApiClient;
 import org.bartram.vidtag.exception.ExternalServiceException;
@@ -16,13 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of YouTubeApiClient using Google's YouTube Data API v3.
@@ -73,7 +71,8 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             String nextPageToken = null;
 
             do {
-                PlaylistItemListResponse response = youtubeService.playlistItems()
+                PlaylistItemListResponse response = youtubeService
+                        .playlistItems()
                         .list(List.of("snippet", "contentDetails"))
                         .setPlaylistId(playlistId)
                         .setMaxResults(MAX_RESULTS)
@@ -87,19 +86,13 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
                     String title = item.getSnippet().getTitle();
                     String description = item.getSnippet().getDescription();
 
-                    Instant publishedAt = Instant.parse(item.getSnippet().getPublishedAt().toString());
+                    Instant publishedAt =
+                            Instant.parse(item.getSnippet().getPublishedAt().toString());
 
                     // Get video duration from separate API call
                     Integer duration = getVideoDuration(videoId);
 
-                    allVideos.add(new VideoMetadata(
-                            videoId,
-                            url,
-                            title,
-                            description,
-                            publishedAt,
-                            duration
-                    ));
+                    allVideos.add(new VideoMetadata(videoId, url, title, description, publishedAt, duration));
                 });
 
                 nextPageToken = response.getNextPageToken();
@@ -116,7 +109,8 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
 
     private Integer getVideoDuration(String videoId) {
         try {
-            var response = youtubeService.videos()
+            var response = youtubeService
+                    .videos()
                     .list(List.of("contentDetails"))
                     .setId(List.of(videoId))
                     .setKey(getApiKey())
@@ -172,13 +166,14 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
     public String findPlaylistByName(String playlistName) {
         try {
             log.debug("Searching for playlist with name: {}", playlistName);
-            log.warn("findPlaylistByName requires OAuth 2.0 authentication. " +
-                    "This will fail with API key only. Use playlist IDs directly instead.");
+            log.warn("findPlaylistByName requires OAuth 2.0 authentication. "
+                    + "This will fail with API key only. Use playlist IDs directly instead.");
 
-            YouTube.Playlists.List request = youtubeService.playlists()
-                .list(List.of("snippet"))
-                .setMine(true)  // Requires OAuth - will fail with API key only
-                .setMaxResults(50L);
+            YouTube.Playlists.List request = youtubeService
+                    .playlists()
+                    .list(List.of("snippet"))
+                    .setMine(true) // Requires OAuth - will fail with API key only
+                    .setMaxResults(50L);
 
             PlaylistListResponse response = request.execute();
             List<Playlist> playlists = response.getItems();
@@ -202,8 +197,10 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
 
         } catch (IOException e) {
             log.error("Failed to search for playlist '{}': {}", playlistName, e.getMessage(), e);
-            throw new ExternalServiceException("youtube",
-                String.format("Failed to search for playlist '%s': %s", playlistName, e.getMessage()), e);
+            throw new ExternalServiceException(
+                    "youtube",
+                    String.format("Failed to search for playlist '%s': %s", playlistName, e.getMessage()),
+                    e);
         }
     }
 }

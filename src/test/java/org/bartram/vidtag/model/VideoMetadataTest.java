@@ -1,10 +1,9 @@
 package org.bartram.vidtag.model;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class VideoMetadataTest {
 
@@ -19,14 +18,7 @@ class VideoMetadataTest {
         Integer duration = 222;
 
         // When
-        VideoMetadata metadata = new VideoMetadata(
-            videoId,
-            url,
-            title,
-            description,
-            publishedAt,
-            duration
-        );
+        VideoMetadata metadata = new VideoMetadata(videoId, url, title, description, publishedAt, duration);
 
         // Then
         assertNotNull(metadata);
@@ -47,13 +39,13 @@ class VideoMetadataTest {
 
         // When
         VideoMetadata metadata = new VideoMetadata(
-            videoId,
-            url,
-            title,
-            null,  // description can be null
-            null,  // publishedAt can be null
-            null   // duration can be null
-        );
+                videoId,
+                url,
+                title,
+                null, // description can be null
+                null, // publishedAt can be null
+                null // duration can be null
+                );
 
         // Then
         assertNotNull(metadata);
@@ -70,22 +62,20 @@ class VideoMetadataTest {
         // Given
         Instant publishedAt = Instant.parse("2024-01-15T10:30:00Z");
         VideoMetadata metadata1 = new VideoMetadata(
-            "dQw4w9WgXcQ",
-            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "Test Video",
-            "Description",
-            publishedAt,
-            300
-        );
+                "dQw4w9WgXcQ",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "Test Video",
+                "Description",
+                publishedAt,
+                300);
 
         VideoMetadata metadata2 = new VideoMetadata(
-            "dQw4w9WgXcQ",
-            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "Test Video",
-            "Description",
-            publishedAt,
-            300
-        );
+                "dQw4w9WgXcQ",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "Test Video",
+                "Description",
+                publishedAt,
+                300);
 
         // Then
         assertEquals(metadata1, metadata2);

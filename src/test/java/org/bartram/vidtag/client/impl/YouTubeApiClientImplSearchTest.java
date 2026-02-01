@@ -1,22 +1,21 @@
 package org.bartram.vidtag.client.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistListResponse;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class YouTubeApiClientImplSearchTest {
@@ -82,7 +81,7 @@ class YouTubeApiClientImplSearchTest {
         when(listRequest.execute()).thenThrow(new IOException("API error"));
 
         assertThatThrownBy(() -> client.findPlaylistByName("tag"))
-            .isInstanceOf(ExternalServiceException.class)
-            .hasMessageContaining("Failed to search for playlist");
+                .isInstanceOf(ExternalServiceException.class)
+                .hasMessageContaining("Failed to search for playlist");
     }
 }

@@ -6,8 +6,4 @@ package org.bartram.vidtag.model;
  * @param id the collection ID
  * @param title the collection title
  */
-public record RaindropCollection(
-    Long id,
-    String title
-) {
-}
+public record RaindropCollection(Long id, String title) {}

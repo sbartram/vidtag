@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
@@ -24,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.io.IOException;
 
 /**
  * REST controller for playlist tagging operations.
@@ -43,9 +42,7 @@ public class PlaylistTaggingController {
     private final VideoTaggingOrchestrator orchestrator;
     private final ObjectMapper objectMapper;
 
-    @Operation(
-        summary = "Tag YouTube playlist videos with AI",
-        description = """
+    @Operation(summary = "Tag YouTube playlist videos with AI", description = """
             Analyzes videos from a YouTube playlist using Claude AI and creates bookmarks
             in Raindrop.io with intelligent tags. Returns a Server-Sent Events (SSE) stream
             for real-time progress updates.
@@ -68,17 +65,16 @@ public class PlaylistTaggingController {
             - `batch_completed` - Batch of videos completed
             - `error` - Error occurred
             - `completed` - Processing finished with summary
-            """
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "SSE stream started successfully. Events will be sent as processing progresses.",
-            content = @Content(
-                mediaType = "text/event-stream",
-                examples = @ExampleObject(
-                    name = "SSE Events",
-                    value = """
+            """)
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "SSE stream started successfully. Events will be sent as processing progresses.",
+                        content =
+                                @Content(
+                                        mediaType = "text/event-stream",
+                                        examples = @ExampleObject(name = "SSE Events", value = """
                         event:started
                         data:{"eventType":"started","message":"Processing playlist: PLxxx","data":null}
 
@@ -87,18 +83,15 @@ public class PlaylistTaggingController {
 
                         event:completed
                         data:{"eventType":"completed","message":"Processing completed","data":{"totalVideos":10,"succeeded":9,"skipped":1,"failed":0}}
-                        """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Validation error - invalid request parameters",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ValidationErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
+                        """))),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Validation error - invalid request parameters",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ValidationErrorResponse.class),
+                                        examples = @ExampleObject(value = """
                         {
                           "errorCode": "VALIDATION_FAILED",
                           "message": "Request validation failed",
@@ -107,27 +100,22 @@ public class PlaylistTaggingController {
                             {"field": "playlistInput", "message": "playlistInput is required"}
                           ]
                         }
-                        """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Resource not found - collection doesn't exist in Raindrop",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "503",
-            description = "External service unavailable - YouTube, Raindrop, or Claude API failure",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        )
-    })
+                        """))),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Resource not found - collection doesn't exist in Raindrop",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ErrorResponse.class))),
+                @ApiResponse(
+                        responseCode = "503",
+                        description = "External service unavailable - YouTube, Raindrop, or Claude API failure",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping(value = "/tag", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> tagPlaylist(@Validated @RequestBody TagPlaylistRequest request) {
         log.info("Received playlist tagging request for: {}", request.playlistInput());
@@ -162,13 +150,11 @@ public class PlaylistTaggingController {
     private void sendEvent(SseEmitter emitter, ProgressEvent event) {
         try {
             String jsonData = objectMapper.writeValueAsString(event);
-            emitter.send(SseEmitter.event()
-                .name(event.eventType())
-                .data(jsonData, MediaType.APPLICATION_JSON));
+            emitter.send(SseEmitter.event().name(event.eventType()).data(jsonData, MediaType.APPLICATION_JSON));
 
             // Complete emitter on terminal events
-            if ("completed".equals(event.eventType()) ||
-                ("error".equals(event.eventType()) && event.message().startsWith("Fatal"))) {
+            if ("completed".equals(event.eventType())
+                    || ("error".equals(event.eventType()) && event.message().startsWith("Fatal"))) {
                 emitter.complete();
             }
         } catch (JsonProcessingException e) {

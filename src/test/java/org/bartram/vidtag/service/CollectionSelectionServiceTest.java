@@ -1,5 +1,12 @@
 package org.bartram.vidtag.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import org.bartram.vidtag.config.RaindropProperties;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.bartram.vidtag.service.YouTubeService.PlaylistMetadata;
@@ -13,14 +20,6 @@ import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class CollectionSelectionServiceTest {
 
@@ -32,6 +31,7 @@ class CollectionSelectionServiceTest {
 
     @Mock
     private ChatClient.Builder chatClientBuilder;
+
     @Mock
     private ChatClient chatClient;
 
@@ -56,12 +56,7 @@ class CollectionSelectionServiceTest {
 
         when(chatClientBuilder.build()).thenReturn(chatClient);
         collectionSelectionService = new CollectionSelectionService(
-            raindropService,
-            youtubeService,
-            chatClientBuilder,
-            raindropProperties,
-            cacheManager
-        );
+                raindropService, youtubeService, chatClientBuilder, raindropProperties, cacheManager);
     }
 
     @Test
@@ -87,12 +82,11 @@ class CollectionSelectionServiceTest {
         String playlistTitle = "Java Programming";
         String playlistDescription = "Learn Java";
         List<VideoMetadata> videos = List.of(
-            new VideoMetadata("v1", "https://youtube.com/v1", "Spring Boot Tutorial", "", Instant.now(), 300)
-        );
+                new VideoMetadata("v1", "https://youtube.com/v1", "Spring Boot Tutorial", "", Instant.now(), 300));
 
         when(raindropService.getUserCollections()).thenReturn(collections);
         when(youtubeService.getPlaylistMetadata(playlistId))
-            .thenReturn(new PlaylistMetadata(playlistTitle, playlistDescription));
+                .thenReturn(new PlaylistMetadata(playlistTitle, playlistDescription));
         when(youtubeService.getPlaylistVideos(playlistId, 10)).thenReturn(videos);
         when(chatClient.prompt(anyString())).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
@@ -153,10 +147,10 @@ class CollectionSelectionServiceTest {
 
     private void setupMocksForAICall() {
         when(raindropService.getUserCollections()).thenReturn(List.of("Technology", "Cooking"));
-        when(youtubeService.getPlaylistMetadata(anyString()))
-            .thenReturn(new PlaylistMetadata("Test", "Test"));
+        when(youtubeService.getPlaylistMetadata(anyString())).thenReturn(new PlaylistMetadata("Test", "Test"));
         when(youtubeService.getPlaylistVideos(anyString(), anyInt()))
-            .thenReturn(List.of(new VideoMetadata("v1", "https://youtube.com/v1", "Title", "", Instant.now(), 300)));
+                .thenReturn(
+                        List.of(new VideoMetadata("v1", "https://youtube.com/v1", "Title", "", Instant.now(), 300)));
         when(chatClient.prompt(anyString())).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callResponseSpec);
     }

@@ -1,5 +1,11 @@
 package org.bartram.vidtag.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.bartram.vidtag.client.YouTubeApiClient;
 import org.bartram.vidtag.model.VideoFilters;
 import org.bartram.vidtag.model.VideoMetadata;
@@ -8,13 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for YouTubeService.
@@ -81,9 +80,15 @@ class YouTubeServiceTest {
         // Given
         String playlistId = "PLtest123";
         List<VideoMetadata> mockVideos = List.of(
-            new VideoMetadata("video1", "https://youtube.com/watch?v=video1", "Video 1", "Description 1", Instant.now(), 300),
-            new VideoMetadata("video2", "https://youtube.com/watch?v=video2", "Video 2", "Description 2", Instant.now(), 600)
-        );
+                new VideoMetadata(
+                        "video1", "https://youtube.com/watch?v=video1", "Video 1", "Description 1", Instant.now(), 300),
+                new VideoMetadata(
+                        "video2",
+                        "https://youtube.com/watch?v=video2",
+                        "Video 2",
+                        "Description 2",
+                        Instant.now(),
+                        600));
         when(youtubeApiClient.getPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         // When
@@ -103,9 +108,10 @@ class YouTubeServiceTest {
         Instant oldDate = Instant.now().minus(60, ChronoUnit.DAYS);
 
         List<VideoMetadata> mockVideos = List.of(
-            new VideoMetadata("video1", "https://youtube.com/watch?v=video1", "Recent Video", "Description", recentDate, 300),
-            new VideoMetadata("video2", "https://youtube.com/watch?v=video2", "Old Video", "Description", oldDate, 600)
-        );
+                new VideoMetadata(
+                        "video1", "https://youtube.com/watch?v=video1", "Recent Video", "Description", recentDate, 300),
+                new VideoMetadata(
+                        "video2", "https://youtube.com/watch?v=video2", "Old Video", "Description", oldDate, 600));
         when(youtubeApiClient.getPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         VideoFilters filters = new VideoFilters(cutoffDate, null, null);
@@ -124,9 +130,20 @@ class YouTubeServiceTest {
         // Given
         String playlistId = "PLtest123";
         List<VideoMetadata> mockVideos = List.of(
-            new VideoMetadata("video1", "https://youtube.com/watch?v=video1", "Short Video", "Description", Instant.now(), 300),
-            new VideoMetadata("video2", "https://youtube.com/watch?v=video2", "Long Video", "Description", Instant.now(), 1800)
-        );
+                new VideoMetadata(
+                        "video1",
+                        "https://youtube.com/watch?v=video1",
+                        "Short Video",
+                        "Description",
+                        Instant.now(),
+                        300),
+                new VideoMetadata(
+                        "video2",
+                        "https://youtube.com/watch?v=video2",
+                        "Long Video",
+                        "Description",
+                        Instant.now(),
+                        1800));
         when(youtubeApiClient.getPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         VideoFilters filters = new VideoFilters(null, 600, null);
@@ -145,10 +162,12 @@ class YouTubeServiceTest {
         // Given
         String playlistId = "PLtest123";
         List<VideoMetadata> mockVideos = List.of(
-            new VideoMetadata("video1", "https://youtube.com/watch?v=video1", "Video 1", "Description", Instant.now(), 300),
-            new VideoMetadata("video2", "https://youtube.com/watch?v=video2", "Video 2", "Description", Instant.now(), 400),
-            new VideoMetadata("video3", "https://youtube.com/watch?v=video3", "Video 3", "Description", Instant.now(), 500)
-        );
+                new VideoMetadata(
+                        "video1", "https://youtube.com/watch?v=video1", "Video 1", "Description", Instant.now(), 300),
+                new VideoMetadata(
+                        "video2", "https://youtube.com/watch?v=video2", "Video 2", "Description", Instant.now(), 400),
+                new VideoMetadata(
+                        "video3", "https://youtube.com/watch?v=video3", "Video 3", "Description", Instant.now(), 500));
         when(youtubeApiClient.getPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         VideoFilters filters = new VideoFilters(null, null, 2);
@@ -170,11 +189,29 @@ class YouTubeServiceTest {
         Instant oldDate = Instant.now().minus(60, ChronoUnit.DAYS);
 
         List<VideoMetadata> mockVideos = List.of(
-            new VideoMetadata("video1", "https://youtube.com/watch?v=video1", "Recent Short 1", "Description", recentDate1, 300),
-            new VideoMetadata("video2", "https://youtube.com/watch?v=video2", "Recent Short 2", "Description", recentDate2, 400),
-            new VideoMetadata("video3", "https://youtube.com/watch?v=video3", "Recent Long", "Description", recentDate1, 1800),
-            new VideoMetadata("video4", "https://youtube.com/watch?v=video4", "Old Short", "Description", oldDate, 300)
-        );
+                new VideoMetadata(
+                        "video1",
+                        "https://youtube.com/watch?v=video1",
+                        "Recent Short 1",
+                        "Description",
+                        recentDate1,
+                        300),
+                new VideoMetadata(
+                        "video2",
+                        "https://youtube.com/watch?v=video2",
+                        "Recent Short 2",
+                        "Description",
+                        recentDate2,
+                        400),
+                new VideoMetadata(
+                        "video3",
+                        "https://youtube.com/watch?v=video3",
+                        "Recent Long",
+                        "Description",
+                        recentDate1,
+                        1800),
+                new VideoMetadata(
+                        "video4", "https://youtube.com/watch?v=video4", "Old Short", "Description", oldDate, 300));
         when(youtubeApiClient.getPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         VideoFilters filters = new VideoFilters(cutoffDate, 600, 1);

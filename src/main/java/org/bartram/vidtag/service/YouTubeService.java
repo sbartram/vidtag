@@ -2,6 +2,10 @@ package org.bartram.vidtag.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.YouTubeApiClient;
@@ -10,11 +14,6 @@ import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.bartram.vidtag.model.VideoFilters;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Service for interacting with YouTube API to fetch playlist videos.
@@ -65,16 +64,14 @@ public class YouTubeService {
 
         // Filter by publishedAfter
         if (filters != null && filters.publishedAfter() != null) {
-            videoStream = videoStream.filter(video ->
-                video.publishedAt() != null && video.publishedAt().isAfter(filters.publishedAfter())
-            );
+            videoStream = videoStream.filter(
+                    video -> video.publishedAt() != null && video.publishedAt().isAfter(filters.publishedAfter()));
         }
 
         // Filter by maxDuration
         if (filters != null && filters.maxDuration() != null) {
-            videoStream = videoStream.filter(video ->
-                video.duration() != null && video.duration() <= filters.maxDuration()
-            );
+            videoStream =
+                    videoStream.filter(video -> video.duration() != null && video.duration() <= filters.maxDuration());
         }
 
         // Limit by maxVideos
@@ -83,8 +80,11 @@ public class YouTubeService {
         }
 
         List<VideoMetadata> filteredVideos = videoStream.toList();
-        log.info("Fetched {} videos from playlist {} (filtered from {})",
-            filteredVideos.size(), playlistId, videos.size());
+        log.info(
+                "Fetched {} videos from playlist {} (filtered from {})",
+                filteredVideos.size(),
+                playlistId,
+                videos.size());
 
         return filteredVideos;
     }
@@ -97,9 +97,12 @@ public class YouTubeService {
      * @param throwable the exception that triggered the fallback
      * @throws ExternalServiceException always thrown with descriptive message
      */
-    private List<VideoMetadata> fetchPlaylistVideosFallback(String playlistId, VideoFilters filters, Throwable throwable) {
-        log.error("YouTube API circuit breaker fallback triggered for playlist {}: {}",
-            playlistId, throwable.getMessage());
+    private List<VideoMetadata> fetchPlaylistVideosFallback(
+            String playlistId, VideoFilters filters, Throwable throwable) {
+        log.error(
+                "YouTube API circuit breaker fallback triggered for playlist {}: {}",
+                playlistId,
+                throwable.getMessage());
         throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
 
@@ -131,8 +134,10 @@ public class YouTubeService {
      * Fallback method when YouTube API circuit breaker is open during playlist search.
      */
     private String findPlaylistByNameFallback(String playlistName, Throwable throwable) {
-        log.error("YouTube API circuit breaker fallback triggered for playlist search '{}': {}",
-            playlistName, throwable.getMessage());
+        log.error(
+                "YouTube API circuit breaker fallback triggered for playlist search '{}': {}",
+                playlistName,
+                throwable.getMessage());
         throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
 

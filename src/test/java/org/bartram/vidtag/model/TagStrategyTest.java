@@ -1,12 +1,12 @@
 package org.bartram.vidtag.model;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.exc.ValueInstantiationException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TagStrategyTest {
 
@@ -58,10 +58,8 @@ class TagStrategyTest {
     @Test
     void testFromStringWithUnknownValueThrowsException() {
         // When/Then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> TagStrategy.fromString("UNKNOWN")
-        );
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> TagStrategy.fromString("UNKNOWN"));
         assertEquals("Unknown TagStrategy: UNKNOWN", exception.getMessage());
     }
 
@@ -133,12 +131,11 @@ class TagStrategyTest {
         String json = "\"INVALID_STRATEGY\"";
 
         // When/Then
-        ValueInstantiationException exception = assertThrows(
-            ValueInstantiationException.class,
-            () -> objectMapper.readValue(json, TagStrategy.class)
-        );
+        ValueInstantiationException exception =
+                assertThrows(ValueInstantiationException.class, () -> objectMapper.readValue(json, TagStrategy.class));
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
-        assertEquals("Unknown TagStrategy: INVALID_STRATEGY", exception.getCause().getMessage());
+        assertEquals(
+                "Unknown TagStrategy: INVALID_STRATEGY", exception.getCause().getMessage());
     }
 
     @Test

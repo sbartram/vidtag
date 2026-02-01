@@ -11,9 +11,4 @@ import java.util.List;
  * @param errorMessage error message if processing failed
  */
 public record VideoProcessingResult(
-    VideoMetadata video,
-    List<TagWithConfidence> selectedTags,
-    ProcessingStatus status,
-    String errorMessage
-) {
-}
+        VideoMetadata video, List<TagWithConfidence> selectedTags, ProcessingStatus status, String errorMessage) {}

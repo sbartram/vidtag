@@ -1,6 +1,12 @@
 package org.bartram.vidtag.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.List;
 import org.bartram.vidtag.config.TagFilterProperties;
 import org.bartram.vidtag.model.RaindropTag;
 import org.bartram.vidtag.model.TagStrategy;
@@ -13,18 +19,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.chat.messages.AssistantMessage;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for VideoTaggingService.
@@ -66,18 +63,14 @@ class VideoTaggingServiceTest {
     void generateTags_shouldReturnTagsFromAIResponse() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Spring Boot Tutorial",
-            "Learn how to build REST APIs with Spring Boot",
-            Instant.now(),
-            1800
-        );
-        List<RaindropTag> existingTags = List.of(
-            new RaindropTag("java"),
-            new RaindropTag("spring"),
-            new RaindropTag("tutorial")
-        );
+                "video123",
+                "https://youtube.com/watch?v=video123",
+                "Java Spring Boot Tutorial",
+                "Learn how to build REST APIs with Spring Boot",
+                Instant.now(),
+                1800);
+        List<RaindropTag> existingTags =
+                List.of(new RaindropTag("java"), new RaindropTag("spring"), new RaindropTag("tutorial"));
         TagStrategy strategy = new TagStrategy(5, 0.7, null);
 
         String aiResponse = """
@@ -104,13 +97,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldFilterByConfidenceThreshold() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.8, null);
 
@@ -129,8 +116,7 @@ class VideoTaggingServiceTest {
 
         // Then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(TagWithConfidence::tag)
-            .containsExactly("java", "programming");
+        assertThat(result).extracting(TagWithConfidence::tag).containsExactly("java", "programming");
         assertThat(result).allMatch(tag -> tag.confidence() >= 0.8);
     }
 
@@ -138,13 +124,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldLimitByMaxTags() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(2, 0.5, null);
 
@@ -164,21 +144,14 @@ class VideoTaggingServiceTest {
 
         // Then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(TagWithConfidence::tag)
-            .containsExactly("java", "spring");
+        assertThat(result).extracting(TagWithConfidence::tag).containsExactly("java", "spring");
     }
 
     @Test
     void generateTags_shouldHandleMarkdownCodeBlocks() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -204,13 +177,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldHandleMarkdownCodeBlocksWithoutLanguage() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -236,13 +203,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldIncludeCustomInstructionsInPrompt() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         String customInstructions = "Focus on programming language tags only";
         TagStrategy strategy = new TagStrategy(5, 0.5, customInstructions);
@@ -266,17 +227,8 @@ class VideoTaggingServiceTest {
     void generateTags_shouldIncludeExistingTagsInPrompt() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
-        List<RaindropTag> existingTags = List.of(
-            new RaindropTag("java"),
-            new RaindropTag("programming")
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
+        List<RaindropTag> existingTags = List.of(new RaindropTag("java"), new RaindropTag("programming"));
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
         String aiResponse = """
@@ -300,13 +252,12 @@ class VideoTaggingServiceTest {
     void generateTags_shouldIncludeVideoTitleAndDescriptionInPrompt() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Advanced Spring Security Tutorial",
-            "Learn OAuth2 and JWT authentication",
-            Instant.now(),
-            1200
-        );
+                "video123",
+                "https://youtube.com/watch?v=video123",
+                "Advanced Spring Security Tutorial",
+                "Learn OAuth2 and JWT authentication",
+                Instant.now(),
+                1200);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -331,13 +282,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldReturnEmptyListOnJsonParseError() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -356,13 +301,7 @@ class VideoTaggingServiceTest {
     void generateTags_withNullStrategy_shouldUseDefaults() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
 
         String aiResponse = """
@@ -385,13 +324,12 @@ class VideoTaggingServiceTest {
     void generateTags_withEmptyExistingTags_shouldWork() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Python Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123",
+                "https://youtube.com/watch?v=video123",
+                "Python Tutorial",
+                "Description",
+                Instant.now(),
+                600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -413,13 +351,7 @@ class VideoTaggingServiceTest {
     void generateTags_shouldSortByConfidenceDescending() {
         // Given
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.0, null);
 
@@ -453,13 +385,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.0, null);
 
@@ -479,10 +405,7 @@ class VideoTaggingServiceTest {
         List<TagWithConfidence> result = service.generateTags(video, existingTags, strategy);
 
         // Then - only non-blocked tags should remain
-        assertThat(result)
-            .hasSize(2)
-            .extracting(TagWithConfidence::tag)
-            .containsExactly("tutorial", "programming");
+        assertThat(result).hasSize(2).extracting(TagWithConfidence::tag).containsExactly("tutorial", "programming");
     }
 
     @Test
@@ -495,13 +418,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -520,9 +437,9 @@ class VideoTaggingServiceTest {
         verify(chatClient).prompt(promptCaptor.capture());
         String capturedPrompt = promptCaptor.getValue();
         assertThat(capturedPrompt)
-            .contains("Do not suggest any of these tags:")
-            .contains("spam")
-            .contains("promotional");
+                .contains("Do not suggest any of these tags:")
+                .contains("spam")
+                .contains("promotional");
     }
 
     @Test
@@ -535,13 +452,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(5, 0.5, null);
 
@@ -571,13 +482,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.0, null);
 
@@ -595,10 +500,7 @@ class VideoTaggingServiceTest {
         List<TagWithConfidence> result = service.generateTags(video, existingTags, strategy);
 
         // Then
-        assertThat(result)
-            .hasSize(1)
-            .extracting(TagWithConfidence::tag)
-            .containsExactly("Tutorial");
+        assertThat(result).hasSize(1).extracting(TagWithConfidence::tag).containsExactly("Tutorial");
     }
 
     @Test
@@ -610,13 +512,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.0, null);
 
@@ -633,10 +529,7 @@ class VideoTaggingServiceTest {
         List<TagWithConfidence> result = service.generateTags(video, existingTags, strategy);
 
         // Then
-        assertThat(result)
-            .hasSize(2)
-            .extracting(TagWithConfidence::tag)
-            .containsExactly("tutorial", "spam");
+        assertThat(result).hasSize(2).extracting(TagWithConfidence::tag).containsExactly("tutorial", "spam");
     }
 
     @Test
@@ -648,13 +541,7 @@ class VideoTaggingServiceTest {
         VideoTaggingService service = new VideoTaggingService(chatClientBuilder, objectMapper, filterProperties);
 
         VideoMetadata video = new VideoMetadata(
-            "video123",
-            "https://youtube.com/watch?v=video123",
-            "Java Tutorial",
-            "Description",
-            Instant.now(),
-            600
-        );
+                "video123", "https://youtube.com/watch?v=video123", "Java Tutorial", "Description", Instant.now(), 600);
         List<RaindropTag> existingTags = List.of();
         TagStrategy strategy = new TagStrategy(10, 0.0, null);
 

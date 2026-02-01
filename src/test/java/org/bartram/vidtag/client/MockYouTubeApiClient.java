@@ -1,13 +1,12 @@
 package org.bartram.vidtag.client;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /**
  * Test configuration providing a mock YouTubeApiClient for integration tests.
@@ -30,23 +29,22 @@ public class MockYouTubeApiClient {
             @Override
             public List<VideoMetadata> getPlaylistVideos(String playlistId) {
                 return List.of(
-                    new VideoMetadata(
-                        "video1",
-                        "https://www.youtube.com/watch?v=video1",
-                        "Spring Boot Tutorial - Getting Started",
-                        "Learn the basics of Spring Boot framework including auto-configuration, starters, and building REST APIs.",
-                        Instant.now().minus(7, ChronoUnit.DAYS),
-                        600  // 10 minutes
-                    ),
-                    new VideoMetadata(
-                        "video2",
-                        "https://www.youtube.com/watch?v=video2",
-                        "Java 21 New Features Overview",
-                        "Explore the new features in Java 21 including virtual threads, pattern matching, and record patterns.",
-                        Instant.now().minus(30, ChronoUnit.DAYS),
-                        1800  // 30 minutes
-                    )
-                );
+                        new VideoMetadata(
+                                "video1",
+                                "https://www.youtube.com/watch?v=video1",
+                                "Spring Boot Tutorial - Getting Started",
+                                "Learn the basics of Spring Boot framework including auto-configuration, starters, and building REST APIs.",
+                                Instant.now().minus(7, ChronoUnit.DAYS),
+                                600 // 10 minutes
+                                ),
+                        new VideoMetadata(
+                                "video2",
+                                "https://www.youtube.com/watch?v=video2",
+                                "Java 21 New Features Overview",
+                                "Explore the new features in Java 21 including virtual threads, pattern matching, and record patterns.",
+                                Instant.now().minus(30, ChronoUnit.DAYS),
+                                1800 // 30 minutes
+                                ));
             }
 
             @Override

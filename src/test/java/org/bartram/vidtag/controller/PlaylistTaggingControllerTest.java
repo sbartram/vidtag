@@ -1,9 +1,15 @@
 package org.bartram.vidtag.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.function.Consumer;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.event.ProgressEvent;
-import org.bartram.vidtag.model.ProcessingSummary;
 import org.bartram.vidtag.service.VideoTaggingOrchestrator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,18 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.function.Consumer;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Unit tests for PlaylistTaggingController.
@@ -56,36 +51,26 @@ class PlaylistTaggingControllerTest {
     @Test
     void tagPlaylist_shouldStartAsyncProcessingForValidRequest() throws Exception {
         // Given
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            "PLtest123",
-            null,
-            null,
-            null
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest("PLtest123", null, null, null);
 
         // When/Then
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(request().asyncStarted())
-            .andExpect(status().isOk());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted())
+                .andExpect(status().isOk());
     }
 
     @Test
     void tagPlaylist_shouldInvokeOrchestratorWithRequest() throws Exception {
         // Given
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            "PLtest123",
-            null,
-            null,
-            null
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest("PLtest123", null, null, null);
 
         // When
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(request().asyncStarted());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted());
 
         // Then
         verify(orchestrator).processPlaylist(requestCaptor.capture(), any());
@@ -104,9 +89,9 @@ class PlaylistTaggingControllerTest {
 
         // When/Then
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -119,9 +104,9 @@ class PlaylistTaggingControllerTest {
 
         // When/Then
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
 
     // Tests for raindropCollectionTitle validation removed - field no longer exists
@@ -130,18 +115,13 @@ class PlaylistTaggingControllerTest {
     @Test
     void tagPlaylist_shouldPassEventEmitterToOrchestrator() throws Exception {
         // Given
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            "PLtest123",
-            null,
-            null,
-            null
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest("PLtest123", null, null, null);
 
         // When
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(request().asyncStarted());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted());
 
         // Then
         verify(orchestrator).processPlaylist(any(), eventEmitterCaptor.capture());
@@ -168,9 +148,9 @@ class PlaylistTaggingControllerTest {
 
         // When
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(request().asyncStarted());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(request().asyncStarted());
 
         // Then
         verify(orchestrator).processPlaylist(requestCaptor.capture(), any());
@@ -184,18 +164,13 @@ class PlaylistTaggingControllerTest {
     @Test
     void tagPlaylist_eventEmitterShouldSerializeEventsToJson() throws Exception {
         // Given
-        TagPlaylistRequest request = new TagPlaylistRequest(
-            "PLtest123",
-            null,
-            null,
-            null
-        );
+        TagPlaylistRequest request = new TagPlaylistRequest("PLtest123", null, null, null);
 
         // When
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(request().asyncStarted());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted());
 
         // Capture the event emitter
         verify(orchestrator).processPlaylist(any(), eventEmitterCaptor.capture());
@@ -216,8 +191,8 @@ class PlaylistTaggingControllerTest {
 
         // When/Then
         mockMvc.perform(post("/api/v1/playlists/tag")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
-            .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -1,8 +1,7 @@
 package org.bartram.vidtag.client;
 
-import org.bartram.vidtag.model.VideoMetadata;
-
 import java.util.List;
+import org.bartram.vidtag.model.VideoMetadata;
 
 /**
  * Client interface for interacting with YouTube Data API.

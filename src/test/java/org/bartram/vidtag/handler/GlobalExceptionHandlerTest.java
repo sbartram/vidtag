@@ -1,7 +1,10 @@
 package org.bartram.vidtag.handler;
 
-import org.bartram.vidtag.dto.error.ErrorResponse;
-import org.bartram.vidtag.dto.error.ValidationErrorResponse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +13,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -63,9 +60,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleValidationErrors() {
         var bindingResult = mock(BindingResult.class);
-        var fieldErrors = List.of(
-            new FieldError("request", "playlistInput", "playlistInput is required")
-        );
+        var fieldErrors = List.of(new FieldError("request", "playlistInput", "playlistInput is required"));
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
         var exception = new MethodArgumentNotValidException(null, bindingResult);

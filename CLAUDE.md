@@ -165,6 +165,7 @@ When adding new features to this Spring Boot application:
 3. Leverage Spring AI's chat client for Claude integration
 4. Write integration tests using Testcontainers to validate against real Redis instances
 5. The application uses Spring Boot 4.0.2, which may have different APIs than Spring Boot 3.x (check documentation links in HELP.md)
+6. Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
 
 ## Implementation Status
 

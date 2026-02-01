@@ -2,13 +2,13 @@ package org.bartram.vidtag.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,16 +20,12 @@ import java.util.List;
  * Service for interacting with Raindrop.io API.
  * Includes circuit breaker protection and caching for tags.
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class RaindropService {
 
-    private static final Logger log = LoggerFactory.getLogger(RaindropService.class);
-
     private final RaindropApiClient raindropApiClient;
-
-    public RaindropService(RaindropApiClient raindropApiClient) {
-        this.raindropApiClient = raindropApiClient;
-    }
 
     /**
      * Fetches all tags for a user with caching.

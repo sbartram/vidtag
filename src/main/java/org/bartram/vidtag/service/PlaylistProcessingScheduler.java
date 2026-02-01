@@ -1,11 +1,11 @@
 package org.bartram.vidtag.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.SchedulerProperties;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.VideoFilters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,25 +18,16 @@ import java.util.List;
  * Scheduled service that processes a YouTube playlist at fixed intervals.
  * Processes all videos from the configured playlist ID through the tagging workflow.
  */
+@Slf4j
 @Service
 @EnableScheduling
+@RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "vidtag.scheduler", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlaylistProcessingScheduler {
-
-    private static final Logger log = LoggerFactory.getLogger(PlaylistProcessingScheduler.class);
 
     private final YouTubeService youtubeService;
     private final VideoTaggingOrchestrator orchestrator;
     private final SchedulerProperties schedulerProperties;
-
-    public PlaylistProcessingScheduler(
-            YouTubeService youtubeService,
-            VideoTaggingOrchestrator orchestrator,
-            SchedulerProperties schedulerProperties) {
-        this.youtubeService = youtubeService;
-        this.orchestrator = orchestrator;
-        this.schedulerProperties = schedulerProperties;
-    }
 
     /**
      * Scheduled job that processes the configured YouTube playlists.

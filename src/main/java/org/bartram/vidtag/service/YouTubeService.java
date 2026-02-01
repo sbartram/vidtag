@@ -2,13 +2,13 @@ package org.bartram.vidtag.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.YouTubeApiClient;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
 import org.bartram.vidtag.model.VideoFilters;
 import org.bartram.vidtag.model.VideoMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,17 +20,14 @@ import java.util.stream.Stream;
  * Service for interacting with YouTube API to fetch playlist videos.
  * Includes circuit breaker protection and retry logic.
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class YouTubeService {
 
-    private static final Logger log = LoggerFactory.getLogger(YouTubeService.class);
     private static final Pattern PLAYLIST_ID_PATTERN = Pattern.compile("(?:list=)([a-zA-Z0-9_-]+)");
 
     private final YouTubeApiClient youtubeApiClient;
-
-    public YouTubeService(YouTubeApiClient youtubeApiClient) {
-        this.youtubeApiClient = youtubeApiClient;
-    }
 
     /**
      * Extracts playlist ID from a YouTube URL or returns the input if it's already an ID.

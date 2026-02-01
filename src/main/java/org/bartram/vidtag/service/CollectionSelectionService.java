@@ -1,10 +1,9 @@
 package org.bartram.vidtag.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.RaindropProperties;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.bartram.vidtag.service.YouTubeService.PlaylistMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,10 @@ import java.util.List;
  * Service for AI-powered collection selection.
  * Analyzes playlist content and determines the most appropriate Raindrop collection.
  */
+@Slf4j
 @Service
 public class CollectionSelectionService {
 
-    private static final Logger log = LoggerFactory.getLogger(CollectionSelectionService.class);
     private static final String CACHE_NAME = "playlist-collections";
     private static final String LOW_CONFIDENCE = "LOW_CONFIDENCE";
     private static final int SAMPLE_VIDEO_COUNT = 10;

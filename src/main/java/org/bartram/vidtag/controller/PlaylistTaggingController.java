@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.dto.error.ErrorResponse;
 import org.bartram.vidtag.dto.error.ValidationErrorResponse;
 import org.bartram.vidtag.event.ProgressEvent;
 import org.bartram.vidtag.service.VideoTaggingOrchestrator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,21 +31,17 @@ import java.io.IOException;
  * REST controller for playlist tagging operations.
  * Provides SSE (Server-Sent Events) streaming for real-time progress updates.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/playlists")
+@RequiredArgsConstructor
 @Tag(name = "Playlist Tagging", description = "AI-powered video tagging for YouTube playlists")
 public class PlaylistTaggingController {
 
-    private static final Logger log = LoggerFactory.getLogger(PlaylistTaggingController.class);
     private static final long SSE_TIMEOUT = 3600000L; // 1 hour
 
     private final VideoTaggingOrchestrator orchestrator;
     private final ObjectMapper objectMapper;
-
-    public PlaylistTaggingController(VideoTaggingOrchestrator orchestrator, ObjectMapper objectMapper) {
-        this.orchestrator = orchestrator;
-        this.objectMapper = objectMapper;
-    }
 
     @Operation(
         summary = "Tag YouTube playlist videos with AI",

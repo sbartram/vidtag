@@ -1,14 +1,13 @@
 package org.bartram.vidtag.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.bartram.vidtag.dto.error.DebugInfo;
 import org.bartram.vidtag.dto.error.ErrorResponse;
 import org.bartram.vidtag.dto.error.ValidationErrorResponse;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.VidtagException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,10 +24,9 @@ import java.util.UUID;
  * Global exception handler for all REST controllers.
  * Maps exceptions to structured error responses with proper HTTP status codes.
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @Value("${vidtag.debug-mode:false}")
     private boolean debugModeEnabled;

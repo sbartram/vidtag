@@ -1,10 +1,10 @@
 package org.bartram.vidtag.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.event.ProgressEvent;
 import org.bartram.vidtag.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +17,11 @@ import java.util.function.Consumer;
  * Orchestrates the video tagging workflow: YouTube -> Raindrop collection resolution -> AI tagging -> bookmark saving.
  * Processes videos in batches and emits SSE progress events throughout the workflow.
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class VideoTaggingOrchestrator {
 
-    private static final Logger log = LoggerFactory.getLogger(VideoTaggingOrchestrator.class);
     private static final int BATCH_SIZE = 10;
     private static final String DEFAULT_USER_ID = "default"; // TODO: Replace with auth context later
 
@@ -28,17 +29,6 @@ public class VideoTaggingOrchestrator {
     private final RaindropService raindropService;
     private final VideoTaggingService videoTaggingService;
     private final CollectionSelectionService collectionSelectionService;
-
-    public VideoTaggingOrchestrator(
-            YouTubeService youtubeService,
-            RaindropService raindropService,
-            VideoTaggingService videoTaggingService,
-            CollectionSelectionService collectionSelectionService) {
-        this.youtubeService = youtubeService;
-        this.raindropService = raindropService;
-        this.videoTaggingService = videoTaggingService;
-        this.collectionSelectionService = collectionSelectionService;
-    }
 
     /**
      * Processes a YouTube playlist asynchronously, tagging videos and saving them to Raindrop.

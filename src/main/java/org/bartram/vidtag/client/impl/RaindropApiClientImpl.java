@@ -1,11 +1,10 @@
 package org.bartram.vidtag.client.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -20,11 +19,11 @@ import java.util.stream.Collectors;
  * Implementation of RaindropApiClient using Raindrop.io REST API.
  * Only activated when raindrop.api.token property is set.
  */
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "raindrop.api.token")
 public class RaindropApiClientImpl implements RaindropApiClient {
 
-    private static final Logger log = LoggerFactory.getLogger(RaindropApiClientImpl.class);
     private static final String BASE_URL = "https://api.raindrop.io/rest/v1";
 
     private final RestClient restClient;

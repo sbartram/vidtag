@@ -53,6 +53,12 @@ dependencies {
 	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-aarch_64")
 	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-x86_64")
 
+	// Lombok
+	compileOnly("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
+	testCompileOnly("org.projectlombok:lombok")
+	testAnnotationProcessor("org.projectlombok:lombok")
+
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	developmentOnly("org.springframework.ai:spring-ai-spring-boot-docker-compose")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

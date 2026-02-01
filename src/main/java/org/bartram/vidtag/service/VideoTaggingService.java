@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.TagFilterProperties;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.model.RaindropTag;
 import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.TagWithConfidence;
 import org.bartram.vidtag.model.VideoMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +25,10 @@ import java.util.stream.Collectors;
 /**
  * Service for AI-powered video tagging using Spring AI with Claude.
  */
+@Slf4j
 @Service
 public class VideoTaggingService {
 
-    private static final Logger log = LoggerFactory.getLogger(VideoTaggingService.class);
     private static final Pattern MARKDOWN_CODE_BLOCK_PATTERN = Pattern.compile("```(?:json)?\\s*\\n?(.+?)\\n?```", Pattern.DOTALL);
     private static final int DEFAULT_MAX_TAGS = 10;
     private static final double DEFAULT_CONFIDENCE_THRESHOLD = 0.0;

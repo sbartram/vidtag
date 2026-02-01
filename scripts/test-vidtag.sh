@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # VidTag Manual Test Script
-# Usage: ./test-vidtag.sh <youtube_playlist_url> <raindrop_collection_name>
+# Usage: ./test-vidtag.sh <youtube_playlist_url>
+#
+# Note: Collection is automatically determined by AI based on playlist content.
 
 set -e
 
@@ -13,20 +15,21 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Check arguments
-if [ $# -ne 2 ]; then
-    echo -e "${RED}Error: Missing required arguments${NC}"
+if [ $# -ne 1 ]; then
+    echo -e "${RED}Error: Missing required argument${NC}"
     echo ""
-    echo "Usage: $0 <youtube_playlist_url> <raindrop_collection_name>"
+    echo "Usage: $0 <youtube_playlist_url>"
     echo ""
     echo "Examples:"
-    echo "  $0 'https://www.youtube.com/playlist?list=PLxxx' 'my-collection'"
-    echo "  $0 'PLxxx' 'my-collection'"
+    echo "  $0 'https://www.youtube.com/playlist?list=PLxxx'"
+    echo "  $0 'PLxxx'"
+    echo ""
+    echo "Note: Collection is automatically determined by AI based on playlist content."
     echo ""
     exit 1
 fi
 
 PLAYLIST_INPUT="$1"
-COLLECTION_NAME="$2"
 
 # Extract playlist ID if full URL provided
 if [[ "$PLAYLIST_INPUT" == *"youtube.com"* ]] || [[ "$PLAYLIST_INPUT" == *"youtu.be"* ]]; then
@@ -47,7 +50,7 @@ echo -e "${BLUE}🚀 VidTag Manual Test${NC}"
 echo -e "${BLUE}=========================================${NC}"
 echo ""
 echo -e "${YELLOW}Playlist ID:${NC} $PLAYLIST_ID"
-echo -e "${YELLOW}Collection:${NC} $COLLECTION_NAME"
+echo -e "${YELLOW}Collection:${NC} (auto-selected by AI)"
 echo ""
 
 # Check if required environment variables are set
@@ -107,15 +110,11 @@ REQUEST_FILE="/tmp/vidtag-test-request-$$.json"
 cat > "$REQUEST_FILE" <<EOF
 {
   "playlistInput": "$PLAYLIST_ID",
-  "raindropCollectionTitle": "$COLLECTION_NAME",
   "filters": {
-    "maxVideos": 5
+    "maxVideos": 5,
+    "skipExisting": true
   },
-  "tagStrategy": {
-    "maxTagsPerVideo": 5,
-    "confidenceThreshold": 0.6,
-    "customInstructions": null
-  },
+  "tagStrategy": "SUGGEST",
   "verbosity": "DETAILED"
 }
 EOF

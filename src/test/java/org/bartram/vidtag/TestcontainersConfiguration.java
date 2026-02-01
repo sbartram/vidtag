@@ -71,6 +71,16 @@ class TestcontainersConfiguration {
 			public void createBookmark(Long collectionId, String url, String title, List<String> tags) {
 				// Stub - no-op
 			}
+
+			@Override
+			public List<RaindropCollection> getCollections() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public Long createCollection(String title) {
+				return 1L; // Return dummy ID
+			}
 		};
 	}
 

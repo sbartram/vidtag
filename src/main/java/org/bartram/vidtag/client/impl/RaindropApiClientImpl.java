@@ -148,6 +148,63 @@ public class RaindropApiClientImpl implements RaindropApiClient {
         }
     }
 
+    @Override
+    public List<RaindropCollection> getCollections() {
+        log.debug("Fetching all collections");
+
+        try {
+            CollectionsResponse response = restClient.get()
+                .uri("/collections")
+                .retrieve()
+                .body(CollectionsResponse.class);
+
+            if (response == null || response.items == null) {
+                log.warn("No collections found");
+                return List.of();
+            }
+
+            List<RaindropCollection> collections = response.items.stream()
+                .map(item -> new RaindropCollection(item.id, item.title))
+                .collect(Collectors.toList());
+
+            log.debug("Retrieved {} collections", collections.size());
+            return collections;
+
+        } catch (Exception e) {
+            log.error("Error fetching collections: {}", e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    @Override
+    public Long createCollection(String title) {
+        log.debug("Creating collection: {}", title);
+
+        try {
+            Map<String, Object> requestBody = Map.of("title", title);
+
+            CollectionCreateResponse response = restClient.post()
+                .uri("/collection")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .retrieve()
+                .body(CollectionCreateResponse.class);
+
+            if (response == null || response.item == null) {
+                log.error("Failed to create collection '{}': null response", title);
+                throw new RuntimeException("Failed to create collection: " + title);
+            }
+
+            Long collectionId = response.item.id;
+            log.info("Created collection '{}' with ID: {}", title, collectionId);
+            return collectionId;
+
+        } catch (Exception e) {
+            log.error("Error creating collection '{}': {}", title, e.getMessage(), e);
+            throw new RuntimeException("Failed to create collection: " + title, e);
+        }
+    }
+
     // Response DTOs for Raindrop API
 
     private record TagsResponse(List<TagItem> items) {
@@ -192,5 +249,8 @@ public class RaindropApiClientImpl implements RaindropApiClient {
     private record Collection(
             @JsonProperty("$id") Long id
     ) {
+    }
+
+    private record CollectionCreateResponse(CollectionItem item) {
     }
 }

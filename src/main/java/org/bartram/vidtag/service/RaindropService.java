@@ -1,6 +1,7 @@
 package org.bartram.vidtag.service;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
@@ -8,9 +9,11 @@ import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -107,6 +110,38 @@ public class RaindropService {
     }
 
     /**
+     * Get all collection titles for the authenticated user.
+     * Results are cached to reduce API calls.
+     *
+     * @return list of collection titles
+     */
+    @Cacheable(value = "raindrop-collections-list", unless = "#result == null || #result.isEmpty()")
+    @CircuitBreaker(name = "raindrop", fallbackMethod = "getUserCollectionsFallback")
+    @Retry(name = "raindrop")
+    public List<String> getUserCollections() {
+        log.debug("Fetching user collections from Raindrop API");
+        List<RaindropCollection> collections = raindropApiClient.getCollections();
+        return collections.stream()
+            .map(RaindropCollection::title)
+            .toList();
+    }
+
+    /**
+     * Create a new collection in Raindrop.
+     * Evicts the collections list cache after successful creation.
+     *
+     * @param title collection title
+     * @return the ID of the created collection
+     */
+    @CacheEvict(value = "raindrop-collections-list", allEntries = true)
+    @CircuitBreaker(name = "raindrop")
+    @Retry(name = "raindrop")
+    public Long createCollection(String title) {
+        log.info("Creating new collection: {}", title);
+        return raindropApiClient.createCollection(title);
+    }
+
+    /**
      * Fallback method when Raindrop API circuit breaker is open for getUserTags.
      */
     private List<RaindropTag> getUserTagsFallback(String userId, Throwable throwable) {
@@ -140,5 +175,13 @@ public class RaindropService {
         log.error("Raindrop API circuit breaker fallback triggered for createBookmark collectionId={}, url={}: {}",
             collectionId, url, throwable.getMessage());
         throw new ExternalServiceException("raindrop", "Failed to create bookmark - Raindrop API unavailable", throwable);
+    }
+
+    /**
+     * Fallback method when Raindrop API circuit breaker is open for getUserCollections.
+     */
+    private List<String> getUserCollectionsFallback(Exception e) {
+        log.warn("Circuit breaker active for getUserCollections, returning empty list: {}", e.getMessage());
+        return Collections.emptyList();
     }
 }

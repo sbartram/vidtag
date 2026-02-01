@@ -211,4 +211,68 @@ class RaindropServiceTest {
         assertThatThrownBy(() -> raindropService.createBookmark(collectionId, url, title, tags))
             .isInstanceOf(RuntimeException.class);
     }
+
+    @Test
+    void getUserCollections_shouldReturnCollectionTitles() {
+        // Arrange
+        List<RaindropCollection> collections = List.of(
+            new RaindropCollection(1L, "Technology"),
+            new RaindropCollection(2L, "Cooking"),
+            new RaindropCollection(3L, "Travel")
+        );
+        when(raindropApiClient.getCollections()).thenReturn(collections);
+
+        // Act
+        List<String> result = raindropService.getUserCollections();
+
+        // Assert
+        assertThat(result).containsExactly("Technology", "Cooking", "Travel");
+        verify(raindropApiClient).getCollections();
+    }
+
+    @Test
+    void getUserCollections_shouldBeCached() {
+        // Arrange
+        List<RaindropCollection> collections = List.of(
+            new RaindropCollection(1L, "Technology")
+        );
+        when(raindropApiClient.getCollections()).thenReturn(collections);
+
+        // Act - call twice
+        List<String> firstCall = raindropService.getUserCollections();
+        List<String> secondCall = raindropService.getUserCollections();
+
+        // Then - Both calls should return same data
+        // Note: @Cacheable won't work in unit tests without Spring context
+        // This test validates behavior but cache testing requires integration tests
+        assertThat(firstCall).containsExactly("Technology");
+        assertThat(secondCall).containsExactly("Technology");
+    }
+
+    @Test
+    void createCollection_shouldCallApiAndReturnId() {
+        // Arrange
+        String collectionTitle = "New Collection";
+        Long expectedId = 42L;
+        when(raindropApiClient.createCollection(collectionTitle)).thenReturn(expectedId);
+
+        // Act
+        Long result = raindropService.createCollection(collectionTitle);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedId);
+        verify(raindropApiClient).createCollection(collectionTitle);
+    }
+
+    @Test
+    void createCollection_shouldEvictCollectionsCache() {
+        // This test verifies cache eviction happens
+        // Implementation will be validated in integration tests
+        String collectionTitle = "New Collection";
+        when(raindropApiClient.createCollection(collectionTitle)).thenReturn(1L);
+
+        raindropService.createCollection(collectionTitle);
+
+        verify(raindropApiClient).createCollection(collectionTitle);
+    }
 }

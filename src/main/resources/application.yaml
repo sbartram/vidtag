@@ -52,7 +52,7 @@ vidtag:
   # Raindrop.io Configuration
   raindrop:
     # Fallback collection when AI confidence is low
-    fallback-collection: ${VIDTAG_RAINDROP_FALLBACK_COLLECTION:Videos}
+    fallback-collection: ${VIDTAG_RAINDROP_FALLBACK_COLLECTION:videos}
     # Cache TTL for playlist → collection mappings
     collection-cache-ttl: ${VIDTAG_RAINDROP_COLLECTION_CACHE_TTL:24h}
     # Cache TTL for user's collection list

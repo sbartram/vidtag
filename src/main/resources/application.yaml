@@ -1,7 +1,6 @@
 spring:
   application:
     name: vidtag
-
   ai:
     anthropic:
       api-key: ${VIDTAG_CLAUDE_API_KEY:}
@@ -10,6 +9,10 @@ spring:
           model: claude-haiku-4-5
           #model: claude-sonnet-4-5
           #model: claude-opus-4-5
+
+logging:
+  level:
+    org.bartram: DEBUG
 
 # External API Configuration
 youtube:

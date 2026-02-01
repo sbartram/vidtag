@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -31,6 +30,8 @@ class CollectionSelectionServiceTest {
     @Mock
     private YouTubeService youtubeService;
 
+    @Mock
+    private ChatClient.Builder chatClientBuilder;
     @Mock
     private ChatClient chatClient;
 
@@ -53,10 +54,11 @@ class CollectionSelectionServiceTest {
 
         cacheManager = new ConcurrentMapCacheManager("playlist-collections");
 
+        when(chatClientBuilder.build()).thenReturn(chatClient);
         collectionSelectionService = new CollectionSelectionService(
             raindropService,
             youtubeService,
-            chatClient,
+            chatClientBuilder,
             raindropProperties,
             cacheManager
         );

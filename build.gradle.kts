@@ -49,6 +49,10 @@ dependencies {
 	// API Documentation (Spring Boot 4.0 compatible)
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0-M1")
 
+	// Netty native DNS resolver for macOS (required by Spring AI WebClient)
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-aarch_64")
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-x86_64")
+
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	developmentOnly("org.springframework.ai:spring-ai-spring-boot-docker-compose")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

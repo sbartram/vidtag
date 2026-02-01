@@ -32,12 +32,12 @@ public class CollectionSelectionService {
     public CollectionSelectionService(
             RaindropService raindropService,
             YouTubeService youtubeService,
-            ChatClient chatClient,
+            ChatClient.Builder chatClientBuilder,
             RaindropProperties raindropProperties,
             CacheManager cacheManager) {
         this.raindropService = raindropService;
         this.youtubeService = youtubeService;
-        this.chatClient = chatClient;
+        this.chatClient = chatClientBuilder.build();
         this.raindropProperties = raindropProperties;
         this.cacheManager = cacheManager;
     }

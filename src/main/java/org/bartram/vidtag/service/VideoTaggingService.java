@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.bartram.vidtag.config.TagFilterProperties;
-import org.bartram.vidtag.exception.DataParsingException;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.model.RaindropTag;
 import org.bartram.vidtag.model.TagStrategy;

@@ -1,12 +1,18 @@
 package org.bartram.vidtag.config;
 
 import java.time.Duration;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for Raindrop.io integration.
  */
+@Getter
+@Setter
+@Accessors(fluent = false)
 @Component
 @ConfigurationProperties(prefix = "vidtag.raindrop")
 public class RaindropProperties {
@@ -25,28 +31,4 @@ public class RaindropProperties {
      * TTL for user's collections list cache.
      */
     private Duration collectionsListCacheTtl = Duration.ofHours(1);
-
-    public String getFallbackCollection() {
-        return fallbackCollection;
-    }
-
-    public void setFallbackCollection(String fallbackCollection) {
-        this.fallbackCollection = fallbackCollection;
-    }
-
-    public Duration getCollectionCacheTtl() {
-        return collectionCacheTtl;
-    }
-
-    public void setCollectionCacheTtl(Duration collectionCacheTtl) {
-        this.collectionCacheTtl = collectionCacheTtl;
-    }
-
-    public Duration getCollectionsListCacheTtl() {
-        return collectionsListCacheTtl;
-    }
-
-    public void setCollectionsListCacheTtl(Duration collectionsListCacheTtl) {
-        this.collectionsListCacheTtl = collectionsListCacheTtl;
-    }
 }

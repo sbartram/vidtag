@@ -69,22 +69,22 @@ public class GlobalExceptionHandler {
         String requestId = generateRequestId();
 
         ErrorResponse response = new ErrorResponse(
-                ex.getErrorCode(),
+                ex.errorCode(),
                 ex.getMessage(),
-                ex.getHttpStatus(),
+                ex.httpStatus(),
                 Instant.now(),
                 requestId,
                 request.getRequestURI(),
                 buildDebugInfo(ex, request, null));
 
         // Log appropriately based on status
-        if (ex.getHttpStatus() >= 500) {
+        if (ex.httpStatus() >= 500) {
             log.error("Server error [requestId={}]: {}", requestId, ex.getMessage(), ex);
         } else {
             log.warn("Client error [requestId={}]: {}", requestId, ex.getMessage());
         }
 
-        return ResponseEntity.status(ex.getHttpStatus()).body(response);
+        return ResponseEntity.status(ex.httpStatus()).body(response);
     }
 
     /**
@@ -98,16 +98,16 @@ public class GlobalExceptionHandler {
         log.error("External service unavailable [requestId={}]: {}", requestId, ex.getMessage(), ex);
 
         ErrorResponse response = new ErrorResponse(
-                ex.getErrorCode(),
+                ex.errorCode(),
                 ex.getMessage(),
                 503,
                 Instant.now(),
                 requestId,
                 request.getRequestURI(),
-                buildDebugInfo(ex, request, ex.getServiceInfo()));
+                buildDebugInfo(ex, request, ex.serviceInfo()));
 
         return ResponseEntity.status(503)
-                .header("Retry-After", ex.getRetryAfterSeconds().toString())
+                .header("Retry-After", ex.retryAfterSeconds().toString())
                 .body(response);
     }
 

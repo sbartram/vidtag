@@ -1,11 +1,17 @@
 package org.bartram.vidtag.config;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for the playlist processing scheduler.
  */
+@Getter
+@Setter
+@Accessors(fluent = false)
 @Component
 @ConfigurationProperties(prefix = "vidtag.scheduler")
 public class SchedulerProperties {
@@ -33,44 +39,4 @@ public class SchedulerProperties {
      */
     @Deprecated(since = "1.0.0", forRemoval = true)
     private String playlistName = "tag";
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public int getFixedDelayHours() {
-        return fixedDelayHours;
-    }
-
-    public void setFixedDelayHours(int fixedDelayHours) {
-        this.fixedDelayHours = fixedDelayHours;
-    }
-
-    public String getPlaylistIds() {
-        return playlistIds;
-    }
-
-    public void setPlaylistIds(String playlistIds) {
-        this.playlistIds = playlistIds;
-    }
-
-    /**
-     * @deprecated Use getPlaylistIds() instead. Finding playlists by name requires OAuth.
-     */
-    @Deprecated(since = "1.0.0", forRemoval = true)
-    public String getPlaylistName() {
-        return playlistName;
-    }
-
-    /**
-     * @deprecated Use setPlaylistIds() instead. Finding playlists by name requires OAuth.
-     */
-    @Deprecated(since = "1.0.0", forRemoval = true)
-    public void setPlaylistName(String playlistName) {
-        this.playlistName = playlistName;
-    }
 }

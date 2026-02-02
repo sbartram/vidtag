@@ -10,9 +10,9 @@ class ResourceNotFoundExceptionTest {
     void shouldCreateExceptionWithResourceAndIdentifier() {
         var exception = new ResourceNotFoundException("Collection", "My Videos");
 
-        assertThat(exception.getErrorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+        assertThat(exception.errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
         assertThat(exception.getMessage()).isEqualTo("Collection 'My Videos' not found");
-        assertThat(exception.getHttpStatus()).isEqualTo(404);
+        assertThat(exception.httpStatus()).isEqualTo(404);
     }
 
     @Test

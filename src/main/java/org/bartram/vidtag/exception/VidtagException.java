@@ -1,9 +1,12 @@
 package org.bartram.vidtag.exception;
 
+import lombok.Getter;
+
 /**
  * Base exception for all VidTag business errors.
  * Provides structured error information including error code and HTTP status.
  */
+@Getter
 public abstract class VidtagException extends RuntimeException {
 
     private final String errorCode;
@@ -19,13 +22,5 @@ public abstract class VidtagException extends RuntimeException {
         super(message, cause);
         this.errorCode = errorCode;
         this.httpStatus = httpStatus;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public int getHttpStatus() {
-        return httpStatus;
     }
 }

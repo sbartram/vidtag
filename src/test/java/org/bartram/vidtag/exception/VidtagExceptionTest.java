@@ -10,9 +10,9 @@ class VidtagExceptionTest {
     void shouldStoreErrorCodeAndHttpStatus() {
         var exception = new TestVidtagException("TEST_ERROR", "Test message", 400);
 
-        assertThat(exception.getErrorCode()).isEqualTo("TEST_ERROR");
+        assertThat(exception.errorCode()).isEqualTo("TEST_ERROR");
         assertThat(exception.getMessage()).isEqualTo("Test message");
-        assertThat(exception.getHttpStatus()).isEqualTo(400);
+        assertThat(exception.httpStatus()).isEqualTo(400);
     }
 
     @Test
@@ -20,9 +20,9 @@ class VidtagExceptionTest {
         var cause = new RuntimeException("Root cause");
         var exception = new TestVidtagException("TEST_ERROR", "Test message", 500, cause);
 
-        assertThat(exception.getErrorCode()).isEqualTo("TEST_ERROR");
+        assertThat(exception.errorCode()).isEqualTo("TEST_ERROR");
         assertThat(exception.getMessage()).isEqualTo("Test message");
-        assertThat(exception.getHttpStatus()).isEqualTo(500);
+        assertThat(exception.httpStatus()).isEqualTo(500);
         assertThat(exception.getCause()).isEqualTo(cause);
     }
 

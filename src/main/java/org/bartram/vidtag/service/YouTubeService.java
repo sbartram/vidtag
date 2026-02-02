@@ -55,7 +55,10 @@ public class YouTubeService {
     @Retry(name = "youtube")
     @CircuitBreaker(name = "youtube", fallbackMethod = "fetchPlaylistVideosFallback")
     public List<VideoMetadata> fetchPlaylistVideos(String playlistId, VideoFilters filters) {
-        log.debug("Fetching playlist videos for playlistId={}", playlistId);
+        log.atDebug()
+                .setMessage("Fetching playlist videos for playlistId={}")
+                .addArgument(playlistId)
+                .log();
 
         List<VideoMetadata> videos = youtubeApiClient.getPlaylistVideos(playlistId);
 
@@ -80,11 +83,12 @@ public class YouTubeService {
         }
 
         List<VideoMetadata> filteredVideos = videoStream.toList();
-        log.info(
-                "Fetched {} videos from playlist {} (filtered from {})",
-                filteredVideos.size(),
-                playlistId,
-                videos.size());
+        log.atInfo()
+                .setMessage("Fetched {} videos from playlist {} (filtered from {})")
+                .addArgument(filteredVideos.size())
+                .addArgument(playlistId)
+                .addArgument(videos.size())
+                .log();
 
         return filteredVideos;
     }
@@ -99,10 +103,11 @@ public class YouTubeService {
      */
     private List<VideoMetadata> fetchPlaylistVideosFallback(
             String playlistId, VideoFilters filters, Throwable throwable) {
-        log.error(
-                "YouTube API circuit breaker fallback triggered for playlist {}: {}",
-                playlistId,
-                throwable.getMessage());
+        log.atError()
+                .setMessage("YouTube API circuit breaker fallback triggered for playlist {}: {}")
+                .addArgument(playlistId)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
 
@@ -117,16 +122,26 @@ public class YouTubeService {
     @Retry(name = "youtube")
     @CircuitBreaker(name = "youtube", fallbackMethod = "findPlaylistByNameFallback")
     public String findPlaylistByName(String playlistName) {
-        log.debug("Searching for playlist with name: {}", playlistName);
+        log.atDebug()
+                .setMessage("Searching for playlist with name: {}")
+                .addArgument(playlistName)
+                .log();
 
         String playlistId = youtubeApiClient.findPlaylistByName(playlistName);
 
         if (playlistId == null) {
-            log.warn("Playlist not found: {}", playlistName);
+            log.atWarn()
+                    .setMessage("Playlist not found: {}")
+                    .addArgument(playlistName)
+                    .log();
             throw new ResourceNotFoundException("Playlist not found: " + playlistName);
         }
 
-        log.info("Found playlist '{}' with ID: {}", playlistName, playlistId);
+        log.atInfo()
+                .setMessage("Found playlist '{}' with ID: {}")
+                .addArgument(playlistName)
+                .addArgument(playlistId)
+                .log();
         return playlistId;
     }
 
@@ -134,10 +149,11 @@ public class YouTubeService {
      * Fallback method when YouTube API circuit breaker is open during playlist search.
      */
     private String findPlaylistByNameFallback(String playlistName, Throwable throwable) {
-        log.error(
-                "YouTube API circuit breaker fallback triggered for playlist search '{}': {}",
-                playlistName,
-                throwable.getMessage());
+        log.atError()
+                .setMessage("YouTube API circuit breaker fallback triggered for playlist search '{}': {}")
+                .addArgument(playlistName)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
 
@@ -150,7 +166,10 @@ public class YouTubeService {
      * @return playlist metadata
      */
     public PlaylistMetadata getPlaylistMetadata(String playlistId) {
-        log.debug("Fetching metadata for playlist: {}", playlistId);
+        log.atDebug()
+                .setMessage("Fetching metadata for playlist: {}")
+                .addArgument(playlistId)
+                .log();
         // For now, return basic metadata - can be enhanced later with actual API call
         return new PlaylistMetadata(playlistId, "");
     }
@@ -164,7 +183,11 @@ public class YouTubeService {
      * @return list of video metadata
      */
     public List<VideoMetadata> getPlaylistVideos(String playlistId, int maxVideos) {
-        log.debug("Fetching up to {} videos from playlist: {}", maxVideos, playlistId);
+        log.atDebug()
+                .setMessage("Fetching up to {} videos from playlist: {}")
+                .addArgument(maxVideos)
+                .addArgument(playlistId)
+                .log();
         VideoFilters filters = new VideoFilters(null, null, maxVideos);
         return fetchPlaylistVideos(playlistId, filters);
     }

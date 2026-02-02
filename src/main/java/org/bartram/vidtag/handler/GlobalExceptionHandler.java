@@ -45,7 +45,11 @@ public class GlobalExceptionHandler {
                 .toList();
 
         String requestId = generateRequestId();
-        log.warn("Validation failed [requestId={}]: {}", requestId, fieldErrors);
+        log.atWarn()
+                .setMessage("Validation failed [requestId={}]: {}")
+                .addArgument(requestId)
+                .addArgument(fieldErrors)
+                .log();
 
         ValidationErrorResponse response = new ValidationErrorResponse(
                 "VALIDATION_FAILED",
@@ -79,9 +83,18 @@ public class GlobalExceptionHandler {
 
         // Log appropriately based on status
         if (ex.httpStatus() >= 500) {
-            log.error("Server error [requestId={}]: {}", requestId, ex.getMessage(), ex);
+            log.atError()
+                    .setMessage("Server error [requestId={}]: {}")
+                    .addArgument(requestId)
+                    .addArgument(ex.getMessage())
+                    .setCause(ex)
+                    .log();
         } else {
-            log.warn("Client error [requestId={}]: {}", requestId, ex.getMessage());
+            log.atWarn()
+                    .setMessage("Client error [requestId={}]: {}")
+                    .addArgument(requestId)
+                    .addArgument(ex.getMessage())
+                    .log();
         }
 
         return ResponseEntity.status(ex.httpStatus()).body(response);
@@ -95,7 +108,12 @@ public class GlobalExceptionHandler {
             ExternalServiceException ex, HttpServletRequest request) {
 
         String requestId = generateRequestId();
-        log.error("External service unavailable [requestId={}]: {}", requestId, ex.getMessage(), ex);
+        log.atError()
+                .setMessage("External service unavailable [requestId={}]: {}")
+                .addArgument(requestId)
+                .addArgument(ex.getMessage())
+                .setCause(ex)
+                .log();
 
         ErrorResponse response = new ErrorResponse(
                 ex.errorCode(),
@@ -118,7 +136,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
 
         String requestId = generateRequestId();
-        log.error("Unexpected error [requestId={}]", requestId, ex);
+        log.atError()
+                .setMessage("Unexpected error [requestId={}]")
+                .addArgument(requestId)
+                .setCause(ex)
+                .log();
 
         ErrorResponse response = new ErrorResponse(
                 "INTERNAL_ERROR",

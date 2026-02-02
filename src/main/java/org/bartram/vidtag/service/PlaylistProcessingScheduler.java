@@ -38,14 +38,18 @@ public class PlaylistProcessingScheduler {
             initialDelayString = "#{@schedulerProperties.initialDelay.toMillis()}")
     public void processTagPlaylist() {
         if (!schedulerProperties.isEnabled()) {
-            log.debug("Scheduler is disabled, skipping execution");
+            log.atDebug()
+                    .setMessage("Scheduler is disabled, skipping execution")
+                    .log();
             return;
         }
 
         String playlistIdsConfig = schedulerProperties.getPlaylistIds();
 
         if (playlistIdsConfig == null || playlistIdsConfig.isBlank()) {
-            log.error("Scheduler configured but no playlist IDs provided. Set vidtag.scheduler.playlist-ids");
+            log.atError()
+                    .setMessage("Scheduler configured but no playlist IDs provided. Set vidtag.scheduler.playlist-ids")
+                    .log();
             return;
         }
 
@@ -56,11 +60,17 @@ public class PlaylistProcessingScheduler {
                 .toList();
 
         if (playlistIds.isEmpty()) {
-            log.error("Scheduler configured but no valid playlist IDs found after parsing: '{}'", playlistIdsConfig);
+            log.atError()
+                    .setMessage("Scheduler configured but no valid playlist IDs found after parsing: '{}'")
+                    .addArgument(playlistIdsConfig)
+                    .log();
             return;
         }
 
-        log.info("Starting scheduled processing for {} playlist(s)", playlistIds.size());
+        log.atInfo()
+                .setMessage("Starting scheduled processing for {} playlist(s)")
+                .addArgument(playlistIds.size())
+                .log();
 
         int totalCount = playlistIds.size();
         int successCount = 0;
@@ -71,7 +81,12 @@ public class PlaylistProcessingScheduler {
             String playlistId = playlistIds.get(i);
             int playlistNumber = i + 1;
 
-            log.info("Processing playlist {} of {}: {}", playlistNumber, totalCount, playlistId);
+            log.atInfo()
+                    .setMessage("Processing playlist {} of {}: {}")
+                    .addArgument(playlistNumber)
+                    .addArgument(totalCount)
+                    .addArgument(playlistId)
+                    .log();
 
             try {
                 // Create request with default settings
@@ -82,23 +97,35 @@ public class PlaylistProcessingScheduler {
                 // Process playlist asynchronously (orchestrator handles SSE events)
                 orchestrator.processPlaylist(request, event -> {
                     // Log progress events (no SSE client for scheduled job)
-                    log.debug("Progress: {}", event.message());
+                    log.atDebug()
+                            .setMessage("Progress: {}")
+                            .addArgument(event.message())
+                            .log();
                 });
 
-                log.info("Successfully initiated processing for playlist: {}", playlistId);
+                log.atInfo()
+                        .setMessage("Successfully initiated processing for playlist: {}")
+                        .addArgument(playlistId)
+                        .log();
                 successCount++;
 
             } catch (Exception e) {
-                log.error("Failed to process playlist '{}': {}", playlistId, e.getMessage(), e);
+                log.atError()
+                        .setMessage("Failed to process playlist '{}': {}")
+                        .addArgument(playlistId)
+                        .addArgument(e.getMessage())
+                        .setCause(e)
+                        .log();
                 failureCount++;
                 // Don't rethrow - continue to next playlist
             }
         }
 
-        log.info(
-                "Completed scheduled processing: {} total, {} succeeded, {} failed",
-                totalCount,
-                successCount,
-                failureCount);
+        log.atInfo()
+                .setMessage("Completed scheduled processing: {} total, {} succeeded, {} failed")
+                .addArgument(totalCount)
+                .addArgument(successCount)
+                .addArgument(failureCount)
+                .log();
     }
 }

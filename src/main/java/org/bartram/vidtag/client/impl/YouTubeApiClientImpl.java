@@ -57,14 +57,20 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
                     .setApplicationName(APPLICATION_NAME)
                     .build();
         } catch (GeneralSecurityException | IOException e) {
-            log.error("Failed to create YouTube service", e);
+            log.atError()
+                    .setMessage("Failed to create YouTube service")
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Failed to initialize YouTube API client", e);
         }
     }
 
     @Override
     public List<VideoMetadata> getPlaylistVideos(String playlistId) {
-        log.debug("Fetching videos from playlist: {}", playlistId);
+        log.atDebug()
+                .setMessage("Fetching videos from playlist: {}")
+                .addArgument(playlistId)
+                .log();
 
         try {
             List<VideoMetadata> allVideos = new ArrayList<>();
@@ -98,11 +104,19 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
                 nextPageToken = response.getNextPageToken();
             } while (nextPageToken != null);
 
-            log.info("Fetched {} videos from playlist {}", allVideos.size(), playlistId);
+            log.atInfo()
+                    .setMessage("Fetched {} videos from playlist {}")
+                    .addArgument(allVideos.size())
+                    .addArgument(playlistId)
+                    .log();
             return allVideos;
 
         } catch (IOException e) {
-            log.error("Failed to fetch playlist videos: {}", playlistId, e);
+            log.atError()
+                    .setMessage("Failed to fetch playlist videos: {}")
+                    .addArgument(playlistId)
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Failed to fetch YouTube playlist", e);
         }
     }
@@ -124,7 +138,11 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             return parseDuration(duration);
 
         } catch (IOException e) {
-            log.warn("Failed to fetch duration for video: {}", videoId, e);
+            log.atWarn()
+                    .setMessage("Failed to fetch duration for video: {}")
+                    .addArgument(videoId)
+                    .setCause(e)
+                    .log();
             return null;
         }
     }
@@ -141,7 +159,11 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             java.time.Duration duration = java.time.Duration.parse(isoDuration);
             return (int) duration.getSeconds();
         } catch (Exception e) {
-            log.warn("Failed to parse duration: {}", isoDuration, e);
+            log.atWarn()
+                    .setMessage("Failed to parse duration: {}")
+                    .addArgument(isoDuration)
+                    .setCause(e)
+                    .log();
             return null;
         }
     }
@@ -165,9 +187,14 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
     @Override
     public String findPlaylistByName(String playlistName) {
         try {
-            log.debug("Searching for playlist with name: {}", playlistName);
-            log.warn("findPlaylistByName requires OAuth 2.0 authentication. "
-                    + "This will fail with API key only. Use playlist IDs directly instead.");
+            log.atDebug()
+                    .setMessage("Searching for playlist with name: {}")
+                    .addArgument(playlistName)
+                    .log();
+            log.atWarn()
+                    .setMessage(
+                            "findPlaylistByName requires OAuth 2.0 authentication. This will fail with API key only. Use playlist IDs directly instead.")
+                    .log();
 
             YouTube.Playlists.List request = youtubeService
                     .playlists()
@@ -179,7 +206,7 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             List<Playlist> playlists = response.getItems();
 
             if (playlists == null || playlists.isEmpty()) {
-                log.debug("No playlists found");
+                log.atDebug().setMessage("No playlists found").log();
                 return null;
             }
 
@@ -187,16 +214,29 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             for (Playlist playlist : playlists) {
                 String title = playlist.getSnippet().getTitle();
                 if (title != null && title.equalsIgnoreCase(playlistName)) {
-                    log.debug("Found playlist '{}' with ID: {}", title, playlist.getId());
+                    log.atDebug()
+                            .setMessage("Found playlist '{}' with ID: {}")
+                            .addArgument(title)
+                            .addArgument(playlist.getId())
+                            .log();
                     return playlist.getId();
                 }
             }
 
-            log.debug("Playlist '{}' not found in {} playlists", playlistName, playlists.size());
+            log.atDebug()
+                    .setMessage("Playlist '{}' not found in {} playlists")
+                    .addArgument(playlistName)
+                    .addArgument(playlists.size())
+                    .log();
             return null;
 
         } catch (IOException e) {
-            log.error("Failed to search for playlist '{}': {}", playlistName, e.getMessage(), e);
+            log.atError()
+                    .setMessage("Failed to search for playlist '{}': {}")
+                    .addArgument(playlistName)
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
             throw new ExternalServiceException(
                     "youtube",
                     String.format("Failed to search for playlist '%s': %s", playlistName, e.getMessage()),

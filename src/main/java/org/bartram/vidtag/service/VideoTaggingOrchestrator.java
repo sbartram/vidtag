@@ -38,7 +38,10 @@ public class VideoTaggingOrchestrator {
      */
     @Async
     public void processPlaylist(TagPlaylistRequest request, Consumer<ProgressEvent> eventEmitter) {
-        log.info("Starting playlist processing for: {}", request.playlistInput());
+        log.atInfo()
+                .setMessage("Starting playlist processing for: {}")
+                .addArgument(request.playlistInput())
+                .log();
 
         int succeeded = 0;
         int skipped = 0;
@@ -52,35 +55,55 @@ public class VideoTaggingOrchestrator {
 
             // Extract playlist ID
             String playlistId = youtubeService.extractPlaylistId(request.playlistInput());
-            log.debug("Extracted playlist ID: {}", playlistId);
+            log.atDebug()
+                    .setMessage("Extracted playlist ID: {}")
+                    .addArgument(playlistId)
+                    .log();
 
             // AI determines collection
             eventEmitter.accept(ProgressEvent.progress("Analyzing playlist to determine collection"));
             String collectionTitle = collectionSelectionService.selectCollection(playlistId);
-            log.info("AI selected collection '{}' for playlist {}", collectionTitle, playlistId);
+            log.atInfo()
+                    .setMessage("AI selected collection '{}' for playlist {}")
+                    .addArgument(collectionTitle)
+                    .addArgument(playlistId)
+                    .log();
 
             eventEmitter.accept(ProgressEvent.progress(String.format("Resolving collection: %s", collectionTitle)));
 
             Long collectionId = raindropService.resolveCollectionId(DEFAULT_USER_ID, collectionTitle);
             if (collectionId == null) {
-                log.warn("Collection not found: {}", collectionTitle);
+                log.atWarn()
+                        .setMessage("Collection not found: {}")
+                        .addArgument(collectionTitle)
+                        .log();
                 eventEmitter.accept(ProgressEvent.error(String.format("Collection not found: %s", collectionTitle)));
                 eventEmitter.accept(
                         ProgressEvent.completed("Processing completed with errors", new ProcessingSummary(0, 0, 0, 0)));
                 return;
             }
-            log.debug("Resolved collection ID: {}", collectionId);
+            log.atDebug()
+                    .setMessage("Resolved collection ID: {}")
+                    .addArgument(collectionId)
+                    .log();
 
             // Fetch existing Raindrop tags (cached)
             eventEmitter.accept(ProgressEvent.progress("Fetching existing tags"));
             List<RaindropTag> existingTags = raindropService.getUserTags(DEFAULT_USER_ID);
-            log.debug("Fetched {} existing tags", existingTags.size());
+            log.atDebug()
+                    .setMessage("Fetched {} existing tags")
+                    .addArgument(existingTags.size())
+                    .log();
 
             // Fetch YouTube videos with filters
             eventEmitter.accept(ProgressEvent.progress("Fetching videos from playlist"));
             List<VideoMetadata> videos = youtubeService.fetchPlaylistVideos(playlistId, request.filters());
             totalVideos = videos.size();
-            log.info("Fetched {} videos from playlist {}", totalVideos, playlistId);
+            log.atInfo()
+                    .setMessage("Fetched {} videos from playlist {}")
+                    .addArgument(totalVideos)
+                    .addArgument(playlistId)
+                    .log();
 
             eventEmitter.accept(ProgressEvent.progress(String.format("Found %d videos to process", totalVideos)));
 
@@ -99,7 +122,12 @@ public class VideoTaggingOrchestrator {
                 int batchSkipped = 0;
                 int batchFailed = 0;
 
-                log.debug("Processing batch {}/{} ({} videos)", batchNumber, batches.size(), batch.size());
+                log.atDebug()
+                        .setMessage("Processing batch {}/{} ({} videos)")
+                        .addArgument(batchNumber)
+                        .addArgument(batches.size())
+                        .addArgument(batch.size())
+                        .log();
 
                 for (VideoMetadata video : batch) {
                     VideoProcessingResult result =
@@ -130,7 +158,11 @@ public class VideoTaggingOrchestrator {
             }
 
         } catch (Exception e) {
-            log.error("Fatal error during playlist processing: {}", e.getMessage(), e);
+            log.atError()
+                    .setMessage("Fatal error during playlist processing: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
             eventEmitter.accept(ProgressEvent.error("Fatal error: " + e.getMessage()));
         }
 
@@ -140,7 +172,10 @@ public class VideoTaggingOrchestrator {
                 String.format("Processing complete: %d succeeded, %d skipped, %d failed", succeeded, skipped, failed),
                 summary));
 
-        log.info("Playlist processing completed: {}", summary);
+        log.atInfo()
+                .setMessage("Playlist processing completed: {}")
+                .addArgument(summary)
+                .log();
     }
 
     /**
@@ -160,12 +195,19 @@ public class VideoTaggingOrchestrator {
             TagStrategy tagStrategy,
             Consumer<ProgressEvent> eventEmitter) {
 
-        log.debug("Processing video: {} - {}", video.videoId(), video.title());
+        log.atDebug()
+                .setMessage("Processing video: {} - {}")
+                .addArgument(video.videoId())
+                .addArgument(video.title())
+                .log();
 
         try {
             // Check if bookmark already exists
             if (raindropService.bookmarkExists(collectionId, video.url())) {
-                log.debug("Video already exists in collection, skipping: {}", video.videoId());
+                log.atDebug()
+                        .setMessage("Video already exists in collection, skipping: {}")
+                        .addArgument(video.videoId())
+                        .log();
 
                 VideoProcessingResult result = new VideoProcessingResult(
                         video,
@@ -191,11 +233,20 @@ public class VideoTaggingOrchestrator {
             eventEmitter.accept(ProgressEvent.videoCompleted(
                     String.format("Tagged '%s' with %d tags", video.title(), tags.size()), result));
 
-            log.info("Successfully processed video: {} with {} tags", video.videoId(), tags.size());
+            log.atInfo()
+                    .setMessage("Successfully processed video: {} with {} tags")
+                    .addArgument(video.videoId())
+                    .addArgument(tags.size())
+                    .log();
             return result;
 
         } catch (Exception e) {
-            log.error("Failed to process video {}: {}", video.videoId(), e.getMessage(), e);
+            log.atError()
+                    .setMessage("Failed to process video {}: {}")
+                    .addArgument(video.videoId())
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
 
             VideoProcessingResult result =
                     new VideoProcessingResult(video, Collections.emptyList(), ProcessingStatus.FAILED, e.getMessage());

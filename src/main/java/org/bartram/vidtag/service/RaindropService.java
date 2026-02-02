@@ -37,9 +37,16 @@ public class RaindropService {
     @Cacheable(value = "raindrop-tags", key = "#userId")
     @CircuitBreaker(name = "raindrop", fallbackMethod = "getUserTagsFallback")
     public List<RaindropTag> getUserTags(String userId) {
-        log.debug("Fetching user tags for userId={}", userId);
+        log.atDebug()
+                .setMessage("Fetching user tags for userId={}")
+                .addArgument(userId)
+                .log();
         List<RaindropTag> tags = raindropApiClient.getUserTags(userId);
-        log.info("Fetched {} tags for user {}", tags.size(), userId);
+        log.atInfo()
+                .setMessage("Fetched {} tags for user {}")
+                .addArgument(tags.size())
+                .addArgument(userId)
+                .log();
         return tags;
     }
 
@@ -55,7 +62,11 @@ public class RaindropService {
      */
     @CircuitBreaker(name = "raindrop", fallbackMethod = "resolveCollectionIdFallback")
     public Long resolveCollectionId(String userId, String collectionTitle) {
-        log.debug("Resolving collection ID for userId={}, title={}", userId, collectionTitle);
+        log.atDebug()
+                .setMessage("Resolving collection ID for userId={}, title={}")
+                .addArgument(userId)
+                .addArgument(collectionTitle)
+                .log();
 
         List<RaindropCollection> collections = raindropApiClient.getUserCollections(userId);
 
@@ -64,7 +75,11 @@ public class RaindropService {
                 .map(RaindropCollection::id)
                 .findFirst()
                 .orElseThrow(() -> {
-                    log.warn("Collection '{}' not found for user {}", collectionTitle, userId);
+                    log.atWarn()
+                            .setMessage("Collection '{}' not found for user {}")
+                            .addArgument(collectionTitle)
+                            .addArgument(userId)
+                            .log();
                     return new ResourceNotFoundException("Collection", collectionTitle);
                 });
     }
@@ -80,9 +95,17 @@ public class RaindropService {
      */
     @CircuitBreaker(name = "raindrop", fallbackMethod = "bookmarkExistsFallback")
     public boolean bookmarkExists(Long collectionId, String url) {
-        log.debug("Checking if bookmark exists: collectionId={}, url={}", collectionId, url);
+        log.atDebug()
+                .setMessage("Checking if bookmark exists: collectionId={}, url={}")
+                .addArgument(collectionId)
+                .addArgument(url)
+                .log();
         boolean exists = raindropApiClient.bookmarkExists(collectionId, url);
-        log.debug("Bookmark exists={} for url={}", exists, url);
+        log.atDebug()
+                .setMessage("Bookmark exists={} for url={}")
+                .addArgument(exists)
+                .addArgument(url)
+                .log();
         return exists;
     }
 
@@ -98,9 +121,19 @@ public class RaindropService {
      */
     @CircuitBreaker(name = "raindrop", fallbackMethod = "createBookmarkFallback")
     public void createBookmark(Long collectionId, String url, String title, List<String> tags) {
-        log.debug("Creating bookmark: collectionId={}, url={}, title={}, tags={}", collectionId, url, title, tags);
+        log.atDebug()
+                .setMessage("Creating bookmark: collectionId={}, url={}, title={}, tags={}")
+                .addArgument(collectionId)
+                .addArgument(url)
+                .addArgument(title)
+                .addArgument(tags)
+                .log();
         raindropApiClient.createBookmark(collectionId, url, title, tags);
-        log.info("Created bookmark in collection {}: {}", collectionId, url);
+        log.atInfo()
+                .setMessage("Created bookmark in collection {}: {}")
+                .addArgument(collectionId)
+                .addArgument(url)
+                .log();
     }
 
     /**
@@ -113,7 +146,7 @@ public class RaindropService {
     @CircuitBreaker(name = "raindrop", fallbackMethod = "getUserCollectionsFallback")
     @Retry(name = "raindrop")
     public List<String> getUserCollections() {
-        log.debug("Fetching user collections from Raindrop API");
+        log.atDebug().setMessage("Fetching user collections from Raindrop API").log();
         List<RaindropCollection> collections = raindropApiClient.getCollections();
         return collections.stream().map(RaindropCollection::title).toList();
     }
@@ -129,7 +162,10 @@ public class RaindropService {
     @CircuitBreaker(name = "raindrop")
     @Retry(name = "raindrop")
     public Long createCollection(String title) {
-        log.info("Creating new collection: {}", title);
+        log.atInfo()
+                .setMessage("Creating new collection: {}")
+                .addArgument(title)
+                .log();
         return raindropApiClient.createCollection(title);
     }
 
@@ -137,10 +173,11 @@ public class RaindropService {
      * Fallback method when Raindrop API circuit breaker is open for getUserTags.
      */
     private List<RaindropTag> getUserTagsFallback(String userId, Throwable throwable) {
-        log.error(
-                "Raindrop API circuit breaker fallback triggered for getUserTags userId={}: {}",
-                userId,
-                throwable.getMessage());
+        log.atError()
+                .setMessage("Raindrop API circuit breaker fallback triggered for getUserTags userId={}: {}")
+                .addArgument(userId)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("raindrop", "Raindrop API is currently unavailable", throwable);
     }
 
@@ -148,11 +185,13 @@ public class RaindropService {
      * Fallback method when Raindrop API circuit breaker is open for resolveCollectionId.
      */
     private Long resolveCollectionIdFallback(String userId, String collectionTitle, Throwable throwable) {
-        log.error(
-                "Raindrop API circuit breaker fallback triggered for resolveCollectionId userId={}, title={}: {}",
-                userId,
-                collectionTitle,
-                throwable.getMessage());
+        log.atError()
+                .setMessage(
+                        "Raindrop API circuit breaker fallback triggered for resolveCollectionId userId={}, title={}: {}")
+                .addArgument(userId)
+                .addArgument(collectionTitle)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("raindrop", "Raindrop API is currently unavailable", throwable);
     }
 
@@ -160,11 +199,13 @@ public class RaindropService {
      * Fallback method when Raindrop API circuit breaker is open for bookmarkExists.
      */
     private boolean bookmarkExistsFallback(Long collectionId, String url, Throwable throwable) {
-        log.error(
-                "Raindrop API circuit breaker fallback triggered for bookmarkExists collectionId={}, url={}: {}",
-                collectionId,
-                url,
-                throwable.getMessage());
+        log.atError()
+                .setMessage(
+                        "Raindrop API circuit breaker fallback triggered for bookmarkExists collectionId={}, url={}: {}")
+                .addArgument(collectionId)
+                .addArgument(url)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("raindrop", "Raindrop API is currently unavailable", throwable);
     }
 
@@ -173,11 +214,13 @@ public class RaindropService {
      */
     private void createBookmarkFallback(
             Long collectionId, String url, String title, List<String> tags, Throwable throwable) {
-        log.error(
-                "Raindrop API circuit breaker fallback triggered for createBookmark collectionId={}, url={}: {}",
-                collectionId,
-                url,
-                throwable.getMessage());
+        log.atError()
+                .setMessage(
+                        "Raindrop API circuit breaker fallback triggered for createBookmark collectionId={}, url={}: {}")
+                .addArgument(collectionId)
+                .addArgument(url)
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException(
                 "raindrop", "Failed to create bookmark - Raindrop API unavailable", throwable);
     }
@@ -186,7 +229,10 @@ public class RaindropService {
      * Fallback method when Raindrop API circuit breaker is open for getUserCollections.
      */
     private List<String> getUserCollectionsFallback(Exception e) {
-        log.warn("Circuit breaker active for getUserCollections, returning empty list: {}", e.getMessage());
+        log.atWarn()
+                .setMessage("Circuit breaker active for getUserCollections, returning empty list: {}")
+                .addArgument(e.getMessage())
+                .log();
         return Collections.emptyList();
     }
 }

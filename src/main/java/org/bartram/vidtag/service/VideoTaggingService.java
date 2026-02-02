@@ -55,10 +55,13 @@ public class VideoTaggingService {
     @CircuitBreaker(name = "claude", fallbackMethod = "generateTagsFallback")
     public List<TagWithConfidence> generateTags(
             VideoMetadata video, List<RaindropTag> existingTags, TagStrategy tagStrategy) {
-        log.debug("Generating tags for video: {}", video.videoId());
+        log.atDebug()
+                .setMessage("Generating tags for video: {}")
+                .addArgument(video.videoId())
+                .log();
 
         String prompt = buildPrompt(video, existingTags, tagStrategy);
-        log.trace("Generated prompt: {}", prompt);
+        log.atTrace().setMessage("Generated prompt: {}").addArgument(prompt).log();
 
         String response = chatClient
                 .prompt(prompt)
@@ -68,7 +71,10 @@ public class VideoTaggingService {
                 .getOutput()
                 .getText();
 
-        log.debug("AI response received for video {}", video.videoId());
+        log.atDebug()
+                .setMessage("AI response received for video {}")
+                .addArgument(video.videoId())
+                .log();
 
         List<TagWithConfidence> tags = parseResponse(response);
 
@@ -92,8 +98,12 @@ public class VideoTaggingService {
                 .limit(maxTags)
                 .collect(Collectors.toList());
 
-        log.info(
-                "Generated {} tags for video {} (filtered from {})", filteredTags.size(), video.videoId(), tags.size());
+        log.atInfo()
+                .setMessage("Generated {} tags for video {} (filtered from {})")
+                .addArgument(filteredTags.size())
+                .addArgument(video.videoId())
+                .addArgument(tags.size())
+                .log();
 
         return filteredTags;
     }
@@ -109,10 +119,11 @@ public class VideoTaggingService {
      */
     private List<TagWithConfidence> generateTagsFallback(
             VideoMetadata video, List<RaindropTag> existingTags, TagStrategy tagStrategy, Throwable throwable) {
-        log.error(
-                "Claude API circuit breaker fallback triggered for video {}: {}",
-                video.videoId(),
-                throwable.getMessage());
+        log.atError()
+                .setMessage("Claude API circuit breaker fallback triggered for video {}: {}")
+                .addArgument(video.videoId())
+                .addArgument(throwable.getMessage())
+                .log();
         throw new ExternalServiceException("claude", "AI tagging service is currently unavailable", throwable);
     }
 
@@ -174,7 +185,7 @@ public class VideoTaggingService {
 
     private List<TagWithConfidence> parseResponse(String response) {
         if (response == null || response.isBlank()) {
-            log.warn("Received empty response from AI");
+            log.atWarn().setMessage("Received empty response from AI").log();
             return Collections.emptyList();
         }
 
@@ -188,8 +199,11 @@ public class VideoTaggingService {
                     .map(tr -> new TagWithConfidence(tr.tag(), tr.confidence(), tr.isExisting()))
                     .collect(Collectors.toList());
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse AI response as JSON: {}", e.getMessage());
-            log.debug("Raw response: {}", response);
+            log.atError()
+                    .setMessage("Failed to parse AI response as JSON: {}")
+                    .addArgument(e.getMessage())
+                    .log();
+            log.atDebug().setMessage("Raw response: {}").addArgument(response).log();
             return Collections.emptyList();
         }
     }
@@ -212,7 +226,10 @@ public class VideoTaggingService {
                         boolean isBlocked = blockedTags.contains(normalizedTag);
 
                         if (isBlocked) {
-                            log.debug("Blocked tag: '{}' (matched blocklist)", tagWithConfidence.tag());
+                            log.atDebug()
+                                    .setMessage("Blocked tag: '{}' (matched blocklist)")
+                                    .addArgument(tagWithConfidence.tag())
+                                    .log();
                         }
 
                         return !isBlocked;
@@ -220,7 +237,11 @@ public class VideoTaggingService {
                     .toList();
 
         } catch (Exception e) {
-            log.warn("Failed to apply tag blocklist filter, continuing without filtering: {}", e.getMessage(), e);
+            log.atWarn()
+                    .setMessage("Failed to apply tag blocklist filter, continuing without filtering: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
             return tags;
         }
     }

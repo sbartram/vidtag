@@ -118,20 +118,34 @@ public class PlaylistTaggingController {
             })
     @PostMapping(value = "/tag", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> tagPlaylist(@Validated @RequestBody TagPlaylistRequest request) {
-        log.info("Received playlist tagging request for: {}", request.playlistInput());
+        log.atInfo()
+                .setMessage("Received playlist tagging request for: {}")
+                .addArgument(request.playlistInput())
+                .log();
 
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
 
         // Setup emitter callbacks
-        emitter.onCompletion(() -> log.info("SSE connection completed for playlist: {}", request.playlistInput()));
+        emitter.onCompletion(() -> log.atInfo()
+                .setMessage("SSE connection completed for playlist: {}")
+                .addArgument(request.playlistInput())
+                .log());
 
         emitter.onTimeout(() -> {
-            log.warn("SSE connection timed out for playlist: {}", request.playlistInput());
+            log.atWarn()
+                    .setMessage("SSE connection timed out for playlist: {}")
+                    .addArgument(request.playlistInput())
+                    .log();
             emitter.complete();
         });
 
         emitter.onError(throwable -> {
-            log.error("SSE error for playlist {}: {}", request.playlistInput(), throwable.getMessage(), throwable);
+            log.atError()
+                    .setMessage("SSE error for playlist {}: {}")
+                    .addArgument(request.playlistInput())
+                    .addArgument(throwable.getMessage())
+                    .setCause(throwable)
+                    .log();
             emitter.completeWithError(throwable);
         });
 
@@ -158,10 +172,18 @@ public class PlaylistTaggingController {
                 emitter.complete();
             }
         } catch (JsonProcessingException e) {
-            log.error("Failed to serialize event: {}", e.getMessage(), e);
+            log.atError()
+                    .setMessage("Failed to serialize event: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
             emitter.completeWithError(e);
         } catch (IOException e) {
-            log.error("Failed to send SSE event: {}", e.getMessage(), e);
+            log.atError()
+                    .setMessage("Failed to send SSE event: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
             emitter.completeWithError(e);
         }
     }

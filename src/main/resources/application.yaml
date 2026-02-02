@@ -44,7 +44,8 @@ vidtag:
   # Scheduler Configuration
   scheduler:
     enabled: false  # Enable/disable scheduled playlist processing
-    fixed-delay-hours: 1  # Delay between job executions in hours
+    fixed-delay: 1h  # Delay between job executions (Duration: 1h, 30m, etc.)
+    initial-delay: 10s  # Initial delay before first execution (Duration)
     playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
 
   # Tag Filtering Configuration

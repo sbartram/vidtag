@@ -1,5 +1,6 @@
 package org.bartram.vidtag.config;
 
+import java.time.Duration;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -22,9 +23,14 @@ public class SchedulerProperties {
     private boolean enabled = true;
 
     /**
-     * Fixed delay between job executions in hours.
+     * Fixed delay between job executions.
      */
-    private int fixedDelayHours = 1;
+    private Duration fixedDelay = Duration.ofHours(1);
+
+    /**
+     * Initial delay before the first execution.
+     */
+    private Duration initialDelay = Duration.ofSeconds(10);
 
     /**
      * Comma-separated YouTube playlist IDs to process (e.g., PLxxx...,PLyyy...).

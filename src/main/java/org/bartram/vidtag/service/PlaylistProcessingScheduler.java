@@ -34,9 +34,8 @@ public class PlaylistProcessingScheduler {
      * Processes playlists sequentially. Individual playlist errors are logged but do not stop execution.
      */
     @Scheduled(
-            fixedDelayString = "#{${vidtag.scheduler.fixed-delay-hours} * 60 * 60 * 1000}",
-            initialDelayString = "#{10 * 1000}" // 10 second initial delay
-            )
+            fixedDelayString = "#{@schedulerProperties.fixedDelay.toMillis()}",
+            initialDelayString = "#{@schedulerProperties.initialDelay.toMillis()}")
     public void processTagPlaylist() {
         if (!schedulerProperties.isEnabled()) {
             log.debug("Scheduler is disabled, skipping execution");

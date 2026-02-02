@@ -268,7 +268,8 @@ Raindrop tags are cached in Redis with 15-minute TTL to reduce API calls.
 - Disabled by default (set `vidtag.scheduler.enabled=true` and configure `playlist-ids` to enable)
 - Configuration in `application.yaml`:
   - `vidtag.scheduler.enabled` - enable/disable scheduler (default: false)
-  - `vidtag.scheduler.fixed-delay-hours` - delay between runs (default: 1 hour)
+  - `vidtag.scheduler.fixed-delay` - delay between runs as Duration (default: 1h)
+  - `vidtag.scheduler.initial-delay` - initial delay before first run as Duration (default: 10s)
   - `vidtag.scheduler.playlist-ids` - Comma-separated YouTube playlist IDs to process (required when enabled)
 
 **Example configuration:**
@@ -276,7 +277,8 @@ Raindrop tags are cached in Redis with 15-minute TTL to reduce API calls.
 vidtag:
   scheduler:
     enabled: true
-    fixed-delay-hours: 1
+    fixed-delay: 1h
+    initial-delay: 30s
     playlist-ids: PLxxx...,PLyyy...,PLzzz...
 ```
 

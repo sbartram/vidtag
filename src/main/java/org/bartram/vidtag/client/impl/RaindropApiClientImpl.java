@@ -35,6 +35,14 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                 .build();
     }
 
+    // Package-private constructor for testing
+    RaindropApiClientImpl(RestClient.Builder restClientBuilder, String apiToken) {
+        this.restClient = restClientBuilder
+                .defaultHeader("Authorization", "Bearer " + apiToken)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
+
     @Override
     public List<RaindropTag> getUserTags(String userId) {
         log.atDebug()

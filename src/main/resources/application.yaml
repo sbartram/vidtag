@@ -10,6 +10,18 @@ spring:
           #model: claude-sonnet-4-5
           #model: claude-opus-4-5
 
+# Actuator Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+    metrics:
+      enabled: true
+
 logging:
   level:
     org.bartram: DEBUG

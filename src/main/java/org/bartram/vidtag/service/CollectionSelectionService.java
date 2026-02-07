@@ -93,6 +93,74 @@ public class CollectionSelectionService {
         return selectedCollection;
     }
 
+    /**
+     * Select the most appropriate collection for a single video.
+     * Uses AI analysis of the video title and description.
+     *
+     * @param video the video metadata to analyze
+     * @return collection title
+     */
+    public String selectCollectionForVideo(VideoMetadata video) {
+        log.atDebug()
+                .setMessage("Selecting collection for video: {}")
+                .addArgument(video.title())
+                .log();
+
+        List<String> availableCollections = raindropService.getUserCollections();
+        if (availableCollections.isEmpty()) {
+            log.atWarn().setMessage("No collections available, using fallback").log();
+            return ensureFallbackExists(availableCollections);
+        }
+
+        String aiChoice = askAIForVideoCollection(availableCollections, video);
+        return validateAndSelectCollection(aiChoice, availableCollections);
+    }
+
+    private String askAIForVideoCollection(List<String> availableCollections, VideoMetadata video) {
+        String prompt = buildVideoPrompt(availableCollections, video);
+        log.atDebug().setMessage("Asking AI to select collection for video").log();
+
+        try {
+            String response = chatClient.prompt(prompt).call().content();
+            return response.trim();
+        } catch (Exception e) {
+            log.atError()
+                    .setMessage("Failed to get AI response for video collection: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+            return LOW_CONFIDENCE;
+        }
+    }
+
+    private String buildVideoPrompt(List<String> availableCollections, VideoMetadata video) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are helping categorize a YouTube video into a Raindrop.io collection.\n\n");
+
+        prompt.append("Available collections:\n");
+        for (String collection : availableCollections) {
+            prompt.append("- ").append(collection).append("\n");
+        }
+
+        prompt.append("\nVideo information:\n");
+        prompt.append("Title: ").append(video.title()).append("\n");
+        if (video.description() != null && !video.description().isBlank()) {
+            prompt.append("Description: ").append(video.description()).append("\n");
+        }
+
+        prompt.append(
+                "\nChoose the most appropriate collection from the available collections above for this video.\n\n");
+        prompt.append("Rules:\n");
+        prompt.append("- Respond with ONLY the exact collection name from the list\n");
+        prompt.append("- If none of the collections are a good fit, respond with exactly \"LOW_CONFIDENCE\"\n");
+        prompt.append("- Do not create new collection names\n");
+        prompt.append("- Do not explain your reasoning\n");
+        prompt.append("- Match the collection name exactly as shown in the list\n\n");
+        prompt.append("Response:");
+
+        return prompt.toString();
+    }
+
     private String getCachedCollection(String playlistId) {
         var cache = cacheManager.getCache(CACHE_NAME);
         if (cache != null) {

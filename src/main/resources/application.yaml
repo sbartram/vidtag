@@ -60,6 +60,12 @@ vidtag:
     initial-delay: 10s  # Initial delay before first execution (Duration)
     playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
 
+  # Unsorted Bookmark Processor Configuration
+  unsorted-processor:
+    enabled: false  # Enable/disable unsorted bookmark processing
+    fixed-delay: 1h  # Delay between processor executions (Duration)
+    initial-delay: 30s  # Initial delay before first execution (Duration)
+
   # Tag Filtering Configuration
   tagging:
     # Comma-separated list of tags to block from AI suggestions (empty = disabled)

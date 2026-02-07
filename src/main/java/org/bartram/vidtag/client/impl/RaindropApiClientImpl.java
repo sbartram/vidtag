@@ -1,11 +1,13 @@
 package org.bartram.vidtag.client.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.RaindropApiClient;
+import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.springframework.beans.factory.annotation.Value;
@@ -268,6 +270,98 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     .setCause(e)
                     .log();
             throw new RuntimeException("Failed to create collection: " + title, e);
+        }
+    }
+
+    @Override
+    public List<Raindrop> getRaindrops(Long collectionId) {
+        log.atDebug()
+                .setMessage("Fetching raindrops from collection: {}")
+                .addArgument(collectionId)
+                .log();
+
+        try {
+            List<Raindrop> allRaindrops = new ArrayList<>();
+            int page = 0;
+
+            while (true) {
+                int currentPage = page;
+                RaindropsResponse response = restClient
+                        .get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/raindrops/" + collectionId)
+                                .queryParam("perpage", "50")
+                                .queryParam("page", String.valueOf(currentPage))
+                                .build())
+                        .retrieve()
+                        .body(RaindropsResponse.class);
+
+                if (response == null || response.items == null || response.items.isEmpty()) {
+                    break;
+                }
+
+                response.items.forEach(
+                        item -> allRaindrops.add(new Raindrop(item.id, item.link, item.title)));
+
+                if (response.items.size() < 50) {
+                    break;
+                }
+
+                page++;
+            }
+
+            log.atInfo()
+                    .setMessage("Fetched {} raindrops from collection {}")
+                    .addArgument(allRaindrops.size())
+                    .addArgument(collectionId)
+                    .log();
+            return allRaindrops;
+
+        } catch (Exception e) {
+            log.atError()
+                    .setMessage("Failed to fetch raindrops from collection: {}")
+                    .addArgument(collectionId)
+                    .setCause(e)
+                    .log();
+            throw new RuntimeException("Failed to fetch raindrops", e);
+        }
+    }
+
+    @Override
+    public void updateRaindrop(Long raindropId, Long collectionId, List<String> tags) {
+        log.atDebug()
+                .setMessage("Updating raindrop {}: collection={}, tags={}")
+                .addArgument(raindropId)
+                .addArgument(collectionId)
+                .addArgument(tags)
+                .log();
+
+        try {
+            Map<String, Object> requestBody =
+                    Map.of("collection", Map.of("$id", collectionId), "tags", tags);
+
+            restClient
+                    .put()
+                    .uri("/raindrop/" + raindropId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.atInfo()
+                    .setMessage("Updated raindrop {} to collection {} with {} tags")
+                    .addArgument(raindropId)
+                    .addArgument(collectionId)
+                    .addArgument(tags.size())
+                    .log();
+
+        } catch (Exception e) {
+            log.atError()
+                    .setMessage("Failed to update raindrop: {}")
+                    .addArgument(raindropId)
+                    .setCause(e)
+                    .log();
+            throw new RuntimeException("Failed to update raindrop", e);
         }
     }
 

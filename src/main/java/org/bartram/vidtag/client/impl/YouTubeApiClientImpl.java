@@ -121,6 +121,55 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
         }
     }
 
+    @Override
+    public VideoMetadata getVideo(String videoId) {
+        log.atDebug()
+                .setMessage("Fetching video metadata for: {}")
+                .addArgument(videoId)
+                .log();
+
+        try {
+            var response = youtubeService
+                    .videos()
+                    .list(List.of("snippet", "contentDetails"))
+                    .setId(List.of(videoId))
+                    .setKey(getApiKey())
+                    .execute();
+
+            if (response.getItems() == null || response.getItems().isEmpty()) {
+                log.atWarn()
+                        .setMessage("Video not found: {}")
+                        .addArgument(videoId)
+                        .log();
+                return null;
+            }
+
+            var item = response.getItems().get(0);
+            String url = "https://www.youtube.com/watch?v=" + videoId;
+            String title = item.getSnippet().getTitle();
+            String description = item.getSnippet().getDescription();
+            Instant publishedAt = Instant.parse(
+                    item.getSnippet().getPublishedAt().toString());
+            String durationStr = item.getContentDetails().getDuration();
+            Integer duration = parseDuration(durationStr);
+
+            VideoMetadata metadata = new VideoMetadata(videoId, url, title, description, publishedAt, duration);
+            log.atInfo()
+                    .setMessage("Fetched metadata for video: {}")
+                    .addArgument(title)
+                    .log();
+            return metadata;
+
+        } catch (IOException e) {
+            log.atError()
+                    .setMessage("Failed to fetch video metadata: {}")
+                    .addArgument(videoId)
+                    .setCause(e)
+                    .log();
+            throw new RuntimeException("Failed to fetch video metadata", e);
+        }
+    }
+
     private Integer getVideoDuration(String videoId) {
         try {
             var response = youtubeService

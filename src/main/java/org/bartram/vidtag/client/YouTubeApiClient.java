@@ -25,4 +25,13 @@ public interface YouTubeApiClient {
      * @return the playlist ID if found, null otherwise
      */
     String findPlaylistByName(String playlistName);
+
+    /**
+     * Fetches metadata for a single video by ID.
+     *
+     * @param videoId the YouTube video ID
+     * @return video metadata, or null if not found
+     * @throws RuntimeException if API call fails
+     */
+    VideoMetadata getVideo(String videoId);
 }

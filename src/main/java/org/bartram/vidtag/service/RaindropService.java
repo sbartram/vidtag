@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.exception.ExternalServiceException;
 import org.bartram.vidtag.exception.ResourceNotFoundException;
+import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.springframework.cache.annotation.CacheEvict;
@@ -170,6 +171,50 @@ public class RaindropService {
     }
 
     /**
+     * Fetches all unsorted bookmarks (collection ID -1).
+     * Protected by circuit breaker with fallback.
+     *
+     * @return list of unsorted raindrops
+     */
+    @CircuitBreaker(name = "raindrop", fallbackMethod = "getUnsortedRaindropsFallback")
+    @Retry(name = "raindrop")
+    public List<Raindrop> getUnsortedRaindrops() {
+        log.atDebug().setMessage("Fetching unsorted raindrops").log();
+        List<Raindrop> raindrops = raindropApiClient.getRaindrops(-1L);
+        log.atInfo()
+                .setMessage("Fetched {} unsorted raindrops")
+                .addArgument(raindrops.size())
+                .log();
+        return raindrops;
+    }
+
+    /**
+     * Updates a raindrop's collection and tags.
+     * Protected by circuit breaker with fallback.
+     *
+     * @param raindropId the raindrop ID to update
+     * @param collectionId the target collection ID
+     * @param tags list of tag names to apply
+     */
+    @CircuitBreaker(name = "raindrop", fallbackMethod = "updateRaindropFallback")
+    @Retry(name = "raindrop")
+    public void updateRaindrop(Long raindropId, Long collectionId, List<String> tags) {
+        log.atDebug()
+                .setMessage("Updating raindrop {}: collection={}, tags={}")
+                .addArgument(raindropId)
+                .addArgument(collectionId)
+                .addArgument(tags)
+                .log();
+        raindropApiClient.updateRaindrop(raindropId, collectionId, tags);
+        log.atInfo()
+                .setMessage("Updated raindrop {} to collection {} with {} tags")
+                .addArgument(raindropId)
+                .addArgument(collectionId)
+                .addArgument(tags.size())
+                .log();
+    }
+
+    /**
      * Fallback method when Raindrop API circuit breaker is open for getUserTags.
      */
     private List<RaindropTag> getUserTagsFallback(String userId, Throwable throwable) {
@@ -234,5 +279,31 @@ public class RaindropService {
                 .addArgument(e.getMessage())
                 .log();
         return Collections.emptyList();
+    }
+
+    /**
+     * Fallback method when Raindrop API circuit breaker is open for getUnsortedRaindrops.
+     */
+    private List<Raindrop> getUnsortedRaindropsFallback(Throwable throwable) {
+        log.atError()
+                .setMessage("Raindrop API circuit breaker fallback triggered for getUnsortedRaindrops: {}")
+                .addArgument(throwable.getMessage())
+                .log();
+        throw new ExternalServiceException("raindrop", "Raindrop API is currently unavailable", throwable);
+    }
+
+    /**
+     * Fallback method when Raindrop API circuit breaker is open for updateRaindrop.
+     */
+    private void updateRaindropFallback(
+            Long raindropId, Long collectionId, List<String> tags, Throwable throwable) {
+        log.atError()
+                .setMessage(
+                        "Raindrop API circuit breaker fallback triggered for updateRaindrop raindropId={}: {}")
+                .addArgument(raindropId)
+                .addArgument(throwable.getMessage())
+                .log();
+        throw new ExternalServiceException(
+                "raindrop", "Failed to update raindrop - Raindrop API unavailable", throwable);
     }
 }

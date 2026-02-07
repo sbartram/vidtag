@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 public class YouTubeService {
 
     private static final Pattern PLAYLIST_ID_PATTERN = Pattern.compile("(?:list=)([a-zA-Z0-9_-]+)");
+    private static final Pattern VIDEO_ID_WATCH_PATTERN = Pattern.compile("(?:youtube\\.com/watch\\?.*v=)([a-zA-Z0-9_-]{11})");
+    private static final Pattern VIDEO_ID_SHORT_PATTERN = Pattern.compile("(?:youtu\\.be/)([a-zA-Z0-9_-]{11})");
 
     private final YouTubeApiClient youtubeApiClient;
 
@@ -190,6 +192,57 @@ public class YouTubeService {
                 .log();
         VideoFilters filters = new VideoFilters(null, null, maxVideos);
         return fetchPlaylistVideos(playlistId, filters);
+    }
+
+    /**
+     * Fetches metadata for a single video by ID.
+     * Protected by circuit breaker and retry logic.
+     *
+     * @param videoId the YouTube video ID
+     * @return video metadata, or null if not found
+     */
+    @Retry(name = "youtube")
+    @CircuitBreaker(name = "youtube", fallbackMethod = "getVideoMetadataFallback")
+    public VideoMetadata getVideoMetadata(String videoId) {
+        log.atDebug()
+                .setMessage("Fetching metadata for video: {}")
+                .addArgument(videoId)
+                .log();
+        return youtubeApiClient.getVideo(videoId);
+    }
+
+    /**
+     * Extracts a YouTube video ID from a URL.
+     * Supports youtube.com/watch?v=XXX and youtu.be/XXX formats.
+     *
+     * @param url the URL to parse
+     * @return the video ID, or null if not a YouTube URL
+     */
+    public String extractVideoId(String url) {
+        if (url == null) {
+            return null;
+        }
+        Matcher watchMatcher = VIDEO_ID_WATCH_PATTERN.matcher(url);
+        if (watchMatcher.find()) {
+            return watchMatcher.group(1);
+        }
+        Matcher shortMatcher = VIDEO_ID_SHORT_PATTERN.matcher(url);
+        if (shortMatcher.find()) {
+            return shortMatcher.group(1);
+        }
+        return null;
+    }
+
+    /**
+     * Fallback method when YouTube API circuit breaker is open during video metadata fetch.
+     */
+    private VideoMetadata getVideoMetadataFallback(String videoId, Throwable throwable) {
+        log.atError()
+                .setMessage("YouTube API circuit breaker fallback triggered for video {}: {}")
+                .addArgument(videoId)
+                .addArgument(throwable.getMessage())
+                .log();
+        throw new ExternalServiceException("youtube", "YouTube API is currently unavailable", throwable);
     }
 
     /**

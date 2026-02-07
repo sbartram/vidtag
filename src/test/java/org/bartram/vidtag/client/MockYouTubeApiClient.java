@@ -51,6 +51,11 @@ public class MockYouTubeApiClient {
             public String findPlaylistByName(String playlistName) {
                 return null;
             }
+
+            @Override
+            public VideoMetadata getVideo(String videoId) {
+                return null;
+            }
         };
     }
 }

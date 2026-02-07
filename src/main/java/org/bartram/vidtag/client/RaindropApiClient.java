@@ -1,6 +1,7 @@
 package org.bartram.vidtag.client;
 
 import java.util.List;
+import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 
@@ -63,4 +64,23 @@ public interface RaindropApiClient {
      * @return the ID of the created collection
      */
     Long createCollection(String title);
+
+    /**
+     * Fetches all bookmarks (raindrops) in a collection.
+     *
+     * @param collectionId the collection ID (-1 for Unsorted)
+     * @return list of raindrops in the collection
+     * @throws RuntimeException if API call fails
+     */
+    List<Raindrop> getRaindrops(Long collectionId);
+
+    /**
+     * Updates a raindrop's collection and tags.
+     *
+     * @param raindropId the raindrop ID to update
+     * @param collectionId the target collection ID
+     * @param tags list of tag names to apply
+     * @throws RuntimeException if API call fails
+     */
+    void updateRaindrop(Long raindropId, Long collectionId, List<String> tags);
 }

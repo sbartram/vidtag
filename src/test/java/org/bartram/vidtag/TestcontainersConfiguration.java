@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.client.YouTubeApiClient;
+import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.bartram.vidtag.model.VideoMetadata;
@@ -43,6 +44,11 @@ public class TestcontainersConfiguration {
 
             @Override
             public String findPlaylistByName(String playlistName) {
+                return null;
+            }
+
+            @Override
+            public VideoMetadata getVideo(String videoId) {
                 return null;
             }
         };
@@ -84,6 +90,16 @@ public class TestcontainersConfiguration {
             @Override
             public Long createCollection(String title) {
                 return 1L; // Return dummy ID
+            }
+
+            @Override
+            public List<Raindrop> getRaindrops(Long collectionId) {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void updateRaindrop(Long raindropId, Long collectionId, List<String> tags) {
+                // Stub - no-op
             }
         };
     }

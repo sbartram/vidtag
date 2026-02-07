@@ -1,8 +1,10 @@
 package org.bartram.vidtag.client;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -76,6 +78,16 @@ public class MockRaindropApiClient {
             @Override
             public Long createCollection(String title) {
                 return 999L; // Return dummy ID for tests
+            }
+
+            @Override
+            public List<Raindrop> getRaindrops(Long collectionId) {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void updateRaindrop(Long raindropId, Long collectionId, List<String> tags) {
+                // No-op for tests
             }
         };
     }

@@ -1,0 +1,44 @@
+# Actuator Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info,environment
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+
+logging:
+  level:
+    org.bartram: DEBUG
+
+# VidTag Application Configuration
+vidtag:
+  # Enable debug mode globally (overridden by ?debug=true param)
+  debug-mode: ${DEBUG_MODE:false}
+
+  # Error response configuration
+  error:
+    include-stack-trace: ${INCLUDE_STACK_TRACE:true}
+    include-binding-errors: true
+    max-stack-trace-length: 2000
+
+  # Scheduler Configuration
+  scheduler:
+    enabled: true  # Enable/disable scheduled playlist processing
+    fixed-delay: 10m  # Delay between job executions (Duration: 1h, 30m, etc.)
+    initial-delay: 60s  # Initial delay before first execution (Duration)
+    playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
+
+  # Unsorted Bookmark Processor Configuration
+  unsorted-processor:
+    enabled: true  # Enable/disable unsorted bookmark processing
+    fixed-delay: 10m  # Delay between processor executions (Duration)
+    initial-delay: 60s  # Initial delay before first execution (Duration)
+
+  # Tag Filtering Configuration
+  tagging:
+    # Comma-separated list of tags to block from AI suggestions (empty = disabled)
+    blocked-tags: ${VIDTAG_TAGGING_BLOCKED_TAGS:youtube,golf-tips,golf-instruction,golf-swing,swing-analysis,online-coaching,pga-instruction

@@ -3,7 +3,7 @@ package org.bartram.vidtag.client.impl;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "youtube.api.key")
 public class YouTubeApiClientImpl implements YouTubeApiClient {
 
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String APPLICATION_NAME = "VidTag";
     private static final long MAX_RESULTS = 50L;
 

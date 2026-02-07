@@ -27,14 +27,12 @@ logging:
     org.bartram: DEBUG
 
 # External API Configuration
-youtube:
-  api:
-    key: ${YOUTUBE_API_KEY:}
+# youtube.api.key and raindrop.api.token are set via environment variables:
+#   YOUTUBE_API_KEY    -> youtube.api.key   (activates YouTubeApiClientImpl)
+#   RAINDROP_API_TOKEN -> raindrop.api.token (activates RaindropApiClientImpl)
+# When not set, stub implementations are used automatically.
 
 raindrop:
-  api:
-    token: ${RAINDROP_API_TOKEN:}
-
   # Redis Cache Configuration
   cache:
     type: redis

@@ -10,6 +10,7 @@ import org.bartram.vidtag.client.RaindropApiClient;
 import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropCollection;
 import org.bartram.vidtag.model.RaindropTag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
 
     private final RestClient restClient;
 
+    @Autowired
     public RaindropApiClientImpl(@Value("${raindrop.api.token}") String apiToken) {
         this.restClient = RestClient.builder()
                 .baseUrl(BASE_URL)
@@ -300,8 +302,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                     break;
                 }
 
-                response.items.forEach(
-                        item -> allRaindrops.add(new Raindrop(item.id, item.link, item.title)));
+                response.items.forEach(item -> allRaindrops.add(new Raindrop(item.id, item.link, item.title)));
 
                 if (response.items.size() < 50) {
                     break;
@@ -337,8 +338,7 @@ public class RaindropApiClientImpl implements RaindropApiClient {
                 .log();
 
         try {
-            Map<String, Object> requestBody =
-                    Map.of("collection", Map.of("$id", collectionId), "tags", tags);
+            Map<String, Object> requestBody = Map.of("collection", Map.of("$id", collectionId), "tags", tags);
 
             restClient
                     .put()

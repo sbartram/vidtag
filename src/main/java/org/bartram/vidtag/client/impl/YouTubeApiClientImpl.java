@@ -148,8 +148,8 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
             String url = "https://www.youtube.com/watch?v=" + videoId;
             String title = item.getSnippet().getTitle();
             String description = item.getSnippet().getDescription();
-            Instant publishedAt = Instant.parse(
-                    item.getSnippet().getPublishedAt().toString());
+            Instant publishedAt =
+                    Instant.parse(item.getSnippet().getPublishedAt().toString());
             String durationStr = item.getContentDetails().getDuration();
             Integer duration = parseDuration(durationStr);
 

@@ -25,7 +25,8 @@ import org.springframework.stereotype.Service;
 public class YouTubeService {
 
     private static final Pattern PLAYLIST_ID_PATTERN = Pattern.compile("(?:list=)([a-zA-Z0-9_-]+)");
-    private static final Pattern VIDEO_ID_WATCH_PATTERN = Pattern.compile("(?:youtube\\.com/watch\\?.*v=)([a-zA-Z0-9_-]{11})");
+    private static final Pattern VIDEO_ID_WATCH_PATTERN =
+            Pattern.compile("(?:youtube\\.com/watch\\?.*v=)([a-zA-Z0-9_-]{11})");
     private static final Pattern VIDEO_ID_SHORT_PATTERN = Pattern.compile("(?:youtu\\.be/)([a-zA-Z0-9_-]{11})");
 
     private final YouTubeApiClient youtubeApiClient;

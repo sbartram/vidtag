@@ -295,11 +295,9 @@ public class RaindropService {
     /**
      * Fallback method when Raindrop API circuit breaker is open for updateRaindrop.
      */
-    private void updateRaindropFallback(
-            Long raindropId, Long collectionId, List<String> tags, Throwable throwable) {
+    private void updateRaindropFallback(Long raindropId, Long collectionId, List<String> tags, Throwable throwable) {
         log.atError()
-                .setMessage(
-                        "Raindrop API circuit breaker fallback triggered for updateRaindrop raindropId={}: {}")
+                .setMessage("Raindrop API circuit breaker fallback triggered for updateRaindrop raindropId={}: {}")
                 .addArgument(raindropId)
                 .addArgument(throwable.getMessage())
                 .log();

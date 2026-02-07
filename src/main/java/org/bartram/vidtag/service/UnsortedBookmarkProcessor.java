@@ -81,7 +81,9 @@ public class UnsortedBookmarkProcessor {
                 .log();
 
         if (youtubeRaindrops.isEmpty()) {
-            log.atInfo().setMessage("No YouTube bookmarks in unsorted collection").log();
+            log.atInfo()
+                    .setMessage("No YouTube bookmarks in unsorted collection")
+                    .log();
             return;
         }
 
@@ -121,7 +123,8 @@ public class UnsortedBookmarkProcessor {
         }
 
         log.atInfo()
-                .setMessage("Unsorted bookmark processing completed: {} succeeded, {} skipped, {} failed out of {} YouTube bookmarks")
+                .setMessage(
+                        "Unsorted bookmark processing completed: {} succeeded, {} skipped, {} failed out of {} YouTube bookmarks")
                 .addArgument(succeeded)
                 .addArgument(skipped)
                 .addArgument(failed)

@@ -9,7 +9,6 @@ import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.VideoFilters;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@EnableScheduling
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "vidtag.scheduler", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlaylistProcessingScheduler {

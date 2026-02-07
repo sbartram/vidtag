@@ -10,7 +10,6 @@ import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.TagWithConfidence;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@EnableScheduling
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "vidtag.unsorted-processor", name = "enabled", havingValue = "true")
 public class UnsortedBookmarkProcessor {

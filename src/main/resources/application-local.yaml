@@ -28,14 +28,14 @@ vidtag:
   # Scheduler Configuration
   scheduler:
     enabled: true  # Enable/disable scheduled playlist processing
-    fixed-delay: 10m  # Delay between job executions (Duration: 1h, 30m, etc.)
+    fixed-delay: 1h  # Delay between job executions (Duration: 1h, 30m, etc.)
     initial-delay: 60s  # Initial delay before first execution (Duration)
     playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
 
   # Unsorted Bookmark Processor Configuration
   unsorted-processor:
     enabled: true  # Enable/disable unsorted bookmark processing
-    fixed-delay: 10m  # Delay between processor executions (Duration)
+    fixed-delay: 1h  # Delay between processor executions (Duration)
     initial-delay: 60s  # Initial delay before first execution (Duration)
 
   # Tag Filtering Configuration

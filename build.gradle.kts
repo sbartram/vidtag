@@ -1,9 +1,9 @@
 plugins {
     java
     jacoco
-    id("org.springframework.boot") version "4.0.2"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "8.2.1"
+    id("com.diffplug.spotless") version "8.4.0"
 }
 
 group = "org.bartram"
@@ -12,7 +12,7 @@ description = "Video tagging app"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -26,8 +26,8 @@ repositories {
     mavenCentral()
 }
 
-extra["springAiVersion"] = "2.0.0-M2"
-extra["springCloudVersion"] = "2025.1.0"
+extra["springAiVersion"] = "2.0.0-M6"
+extra["springCloudVersion"] = "2025.1.1"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -40,16 +40,16 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 
     // YouTube Data API
-    implementation("com.google.apis:google-api-services-youtube:v3-rev20250714-2.0.0")
-    implementation("com.google.api-client:google-api-client:2.7.0")
-    implementation("com.google.oauth-client:google-oauth-client-jetty:1.36.0")
-    implementation("com.google.http-client:google-http-client-gson:1.45.1")
+    implementation("com.google.apis:google-api-services-youtube:v3-rev20260430-2.0.0")
+    implementation("com.google.api-client:google-api-client:2.9.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.39.0")
+    implementation("com.google.http-client:google-http-client-gson:2.1.0")
 
     // Error handling utilities
-    implementation("org.apache.commons:commons-lang3:3.14.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // API Documentation (Spring Boot 4.0 compatible)
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0-M1")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
     // Netty native DNS resolver for macOS (required by Spring AI WebClient)
     runtimeOnly("io.netty:netty-resolver-dns-native-macos::osx-aarch_64")
@@ -91,7 +91,7 @@ tasks.withType<Test> {
 }
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.14"
 }
 
 tasks.jacocoTestReport {

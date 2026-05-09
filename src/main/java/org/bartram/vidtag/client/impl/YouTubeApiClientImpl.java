@@ -1,6 +1,5 @@
 package org.bartram.vidtag.client.impl;
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -9,7 +8,6 @@ import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.PlaylistListResponse;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,18 +49,10 @@ public class YouTubeApiClientImpl implements YouTubeApiClient {
     }
 
     private YouTube createYouTubeService() {
-        try {
-            final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            return new YouTube.Builder(httpTransport, JSON_FACTORY, null)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-        } catch (GeneralSecurityException | IOException e) {
-            log.atError()
-                    .setMessage("Failed to create YouTube service")
-                    .setCause(e)
-                    .log();
-            throw new RuntimeException("Failed to initialize YouTube API client", e);
-        }
+        final NetHttpTransport httpTransport = new NetHttpTransport.Builder().build();
+        return new YouTube.Builder(httpTransport, JSON_FACTORY, null)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
     }
 
     @Override

@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM gradle:8-jdk21-alpine AS build
+FROM gradle:9-jdk25-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY src src
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Stage 2: Runtime image
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 # Install wget for health checks
 RUN apk add --no-cache wget

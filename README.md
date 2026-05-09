@@ -16,7 +16,7 @@ AI-powered video tagging service that analyzes YouTube playlist videos and autom
 
 ### Prerequisites
 
-- Java 21+
+- Java 25+
 - Docker (for Redis)
 - API Keys:
   - Anthropic Claude API key
@@ -130,12 +130,12 @@ The endpoint streams the following event types:
 
 ### Technology Stack
 
-- **Framework**: Spring Boot 4.0.2
-- **Language**: Java 21
+- **Framework**: Spring Boot 4.0.6
+- **Language**: Java 25
 - **AI**: Spring AI with Anthropic Claude
 - **Cache**: Redis
 - **Resilience**: Resilience4J (Circuit Breaker, Retry)
-- **API Docs**: springdoc-openapi 3.0.0-M1
+- **API Docs**: springdoc-openapi 3.0.3
 - **Testing**: Testcontainers
 
 ### External APIs

@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("deprecation") // Tests target the deprecated findPlaylistByName method
 class YouTubeApiClientImplSearchTest {
 
     @Mock

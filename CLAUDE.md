@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-VidTag is a video tagging application built with Spring Boot 4.0.2, using Java 21. The application integrates with:
+VidTag is a video tagging application built with Spring Boot 4.0.6, using Java 25. The application integrates with:
 - **Spring AI with Anthropic Claude** for AI-powered video analysis and tagging
 - **Redis** for caching
 - **Spring Cloud Circuit Breaker (Resilience4J)** for fault tolerance
@@ -79,8 +79,8 @@ See [docs/DOCKER.md](docs/DOCKER.md) for comprehensive Docker deployment guide.
 
 ### Dependency Management
 The project uses Spring Boot dependency management with:
-- Spring AI BOM version 2.0.0-M2
-- Spring Cloud BOM version 2025.1.0
+- Spring AI BOM version 2.0.0-M6
+- Spring Cloud BOM version 2025.1.1
 
 ### AI Integration
 The application is configured to use Anthropic Claude via Spring AI. The API key must be provided via the environment variable `VIDTAG_CLAUDE_API_KEY`. Model selection is configurable in `application.yaml`:
@@ -201,7 +201,7 @@ When adding new features to this Spring Boot application:
 2. Use Spring Boot's auto-configuration where possible
 3. Leverage Spring AI's chat client for Claude integration
 4. Write integration tests using Testcontainers to validate against real Redis instances
-5. The application uses Spring Boot 4.0.2, which may have different APIs than Spring Boot 3.x (check documentation links in HELP.md)
+5. The application uses Spring Boot 4.0.6, which may have different APIs than Spring Boot 3.x (check documentation links in HELP.md)
 6. Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
 
 ## Implementation Status

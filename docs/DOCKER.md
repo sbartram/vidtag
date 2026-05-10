@@ -33,7 +33,7 @@ RAINDROP_API_TOKEN=your-raindrop-token  # Optional
 Build the application image and start all services:
 
 ```bash
-docker compose up --build
+docker compose --profile deploy up --build
 ```
 
 This will:
@@ -41,6 +41,12 @@ This will:
 - Start Redis container
 - Start VidTag application container
 - Configure networking between containers
+
+> **Why `--profile deploy`?** The `app:` service is gated behind a Compose
+> profile so that local development (`./gradlew bootRun`) only brings up
+> Redis as a dependency and runs the JAR on the host. The `deploy` profile
+> opts into running the full stack inside Docker. Plain `docker compose up`
+> (without the flag) starts Redis only.
 
 ### 3. Verify Services
 
@@ -186,7 +192,7 @@ docker compose exec app sh -c 'wget -O- redis:6379'
 
 Force rebuild:
 ```bash
-docker compose up --build --force-recreate
+docker compose --profile deploy up --build --force-recreate
 ```
 
 ## Production Considerations

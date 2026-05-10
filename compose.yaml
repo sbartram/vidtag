@@ -13,6 +13,11 @@ services:
       - vidtag-network
 
   app:
+    # Only active under the "deploy" profile. Without it, Spring Boot's
+    # docker-compose dev integration (used by bootRun) and a plain
+    # `docker compose up` won't touch this service. Run the full stack
+    # with: `docker compose --profile deploy up --build`.
+    profiles: [deploy]
     build:
       context: .
       dockerfile: Dockerfile

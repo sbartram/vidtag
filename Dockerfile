@@ -9,6 +9,7 @@ COPY gradle gradle
 COPY gradlew .
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
+COPY lombok.config .
 
 # Download dependencies (cached layer)
 RUN ./gradlew dependencies --no-daemon

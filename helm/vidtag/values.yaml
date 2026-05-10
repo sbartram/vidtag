@@ -1,0 +1,48 @@
+nameOverride: ""
+fullnameOverride: ""
+
+app:
+  image:
+    repository: registry.bartram.org/bartram/vidtag
+    tag: ""
+    pullPolicy: Always
+  imagePullSecrets: []
+  service:
+    type: LoadBalancer
+    port: 80
+    annotations:
+      metallb.universe.tf/loadBalancerIPs: "192.168.44.211"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+  replicaCount: 1
+  probes:
+    startup:
+      periodSeconds: 5
+      failureThreshold: 60
+    readiness:
+      initialDelaySeconds: 0
+      periodSeconds: 10
+    liveness:
+      periodSeconds: 30
+      failureThreshold: 5
+
+redis:
+  image:
+    repository: redis
+    tag: "7"
+
+spring:
+  profiles: ""
+
+# Required: claudeApiKey must be supplied at install time (helm will fail otherwise).
+# Optional: youtubeApiKey and raindropApiToken — leave empty to fall back to stub
+# implementations (the deployment will not inject these env vars when unset, so the
+# corresponding @ConditionalOnProperty beans stay deactivated).
+secrets:
+  claudeApiKey: ""
+  youtubeApiKey: ""
+  raindropApiToken: ""

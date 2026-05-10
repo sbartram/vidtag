@@ -4,11 +4,16 @@ plugins {
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.4.0"
+    id("pl.allegro.tech.build.axion-release") version "1.21.1"
 }
 
 group = "org.bartram"
-version = "0.0.1-SNAPSHOT"
+version = scmVersion.version
 description = "Video tagging app"
+
+scmVersion {
+    versionIncrementer("incrementPatch")
+}
 
 java {
     toolchain {
@@ -131,4 +136,66 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+val gitPushRelease by tasks.registering(Exec::class) {
+    commandLine("git", "push", "--follow-tags", "origin", "HEAD")
+}
+
+// Bump helm/vidtag/Chart.yaml appVersion to the upcoming release version so the
+// tagged commit matches what deploy.sh will publish. Without this, the post-release
+// snapshot bump puts HEAD one commit past the tag and `currentVersion` reports
+// `N+1-SNAPSHOT` while the chart still references the previous appVersion.
+val writeAppVersion by tasks.registering {
+    mustRunAfter("verifyRelease")
+    val releaseVersion = version.toString().removeSuffix("-SNAPSHOT")
+    val chartFile = file("helm/vidtag/Chart.yaml")
+    doLast {
+        val original = chartFile.readText()
+        val updated =
+            original.replace(
+                Regex("""^appVersion:\s*".*"$""", RegexOption.MULTILINE),
+                "appVersion: \"$releaseVersion\"",
+            )
+        if (updated == original) {
+            logger.lifecycle("Chart.yaml appVersion already at $releaseVersion")
+        } else {
+            chartFile.writeText(updated)
+            logger.lifecycle("Bumped Chart.yaml appVersion to $releaseVersion")
+        }
+    }
+}
+
+val commitAppVersion by tasks.registering(Exec::class) {
+    dependsOn(writeAppVersion)
+    commandLine(
+        "bash",
+        "-c",
+        """
+        if git diff --quiet -- helm/vidtag/Chart.yaml; then
+            echo "Chart.yaml unchanged — skipping commit"
+            exit 0
+        fi
+        APP_VERSION=${'$'}(awk -F'"' '/^appVersion:/ {print ${'$'}2}' helm/vidtag/Chart.yaml)
+        git add helm/vidtag/Chart.yaml
+        git commit -m "chore(helm): bump appVersion to ${'$'}APP_VERSION"
+        """.trimIndent(),
+    )
+}
+
+tasks.named("createRelease") {
+    dependsOn(commitAppVersion)
+}
+
+// actions.clear() removes axion's JGit-based push (incompatible with SSH-only
+// remotes); gitPushRelease replaces it via finalizedBy. Same pattern as vidq.
+tasks.named("release") {
+    actions.clear()
+    dependsOn("createRelease")
+    finalizedBy(gitPushRelease)
+}
+
+tasks.named("pushRelease") {
+    actions.clear()
+    finalizedBy(gitPushRelease)
 }

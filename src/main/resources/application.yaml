@@ -5,10 +5,8 @@ spring:
     anthropic:
       api-key: ${VIDTAG_CLAUDE_API_KEY:}
       chat:
-        options:
-          model: claude-haiku-4-5
-          #model: claude-sonnet-4-5
-          #model: claude-opus-4-5
+        model: claude-sonnet-4-7
+#        model: claude-opus-4-7
 
 # Actuator Management Endpoints
 management:
@@ -53,16 +51,16 @@ vidtag:
 
   # Scheduler Configuration
   scheduler:
-    enabled: false  # Enable/disable scheduled playlist processing
+    enabled: true  # Enable/disable scheduled playlist processing
     fixed-delay: 1h  # Delay between job executions (Duration: 1h, 30m, etc.)
-    initial-delay: 10s  # Initial delay before first execution (Duration)
+    initial-delay: 60s  # Initial delay before first execution (Duration)
     playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
 
   # Unsorted Bookmark Processor Configuration
   unsorted-processor:
-    enabled: false  # Enable/disable unsorted bookmark processing
+    enabled: true  # Enable/disable unsorted bookmark processing
     fixed-delay: 1h  # Delay between processor executions (Duration)
-    initial-delay: 30s  # Initial delay before first execution (Duration)
+    initial-delay: 60s  # Initial delay before first execution (Duration)
 
   # Tag Filtering Configuration
   tagging:

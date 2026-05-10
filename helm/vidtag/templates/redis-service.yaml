@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vidtag.fullname" . }}-redis
+  labels:
+    {{- include "vidtag.labels" . | nindent 4 }}
+    {{- include "vidtag.redisSelectorLabels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    {{- include "vidtag.redisSelectorLabels" . | nindent 4 }}

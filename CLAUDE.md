@@ -56,8 +56,11 @@ VidTag is a video tagging application built with Spring Boot 4.0.6, using Java 2
 # Build Docker image
 docker build -t vidtag:latest .
 
-# Run with Docker Compose (recommended)
-docker compose up --build
+# Run full stack (app + Redis) in Docker — note the `deploy` profile
+docker compose --profile deploy up --build
+
+# Run dependencies only (Redis); use this when running the app via ./gradlew bootRun
+docker compose up
 
 # Run standalone container (requires external Redis)
 docker run -d \

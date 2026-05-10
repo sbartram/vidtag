@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vidtag.fullname" . }}
+  labels:
+    {{- include "vidtag.labels" . | nindent 4 }}
+    {{- include "vidtag.appSelectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vidtag.appSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vidtag.labels" . | nindent 8 }}
+        {{- include "vidtag.appSelectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.app.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: vidtag
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: {{ include "vidtag.fullname" . }}-config
+          env:
+            - name: VIDTAG_CLAUDE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vidtag.fullname" . }}-secret
+                  key: vidtag-claude-api-key
+            {{- if .Values.secrets.youtubeApiKey }}
+            - name: YOUTUBE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vidtag.fullname" . }}-secret
+                  key: youtube-api-key
+            {{- end }}
+            {{- if .Values.secrets.raindropApiToken }}
+            - name: RAINDROP_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vidtag.fullname" . }}-secret
+                  key: raindrop-api-token
+            {{- end }}
+            - name: JDK_JAVA_OPTIONS
+              value: "-XX:MaxDirectMemorySize=64M"
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            periodSeconds: {{ .Values.app.probes.startup.periodSeconds }}
+            failureThreshold: {{ .Values.app.probes.startup.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: {{ .Values.app.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.app.probes.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            periodSeconds: {{ .Values.app.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.app.probes.liveness.failureThreshold }}
+          {{- with .Values.app.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

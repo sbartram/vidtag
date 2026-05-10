@@ -128,6 +128,8 @@ The endpoint streams the following event types:
 
 ## Architecture
 
+See [docs/architecture.md](docs/architecture.md) for the data-flow diagram showing how scheduled jobs and HTTP endpoints converge on shared orchestration code and fan out to YouTube, Raindrop, and Claude.
+
 ### Technology Stack
 
 - **Framework**: Spring Boot 4.0.6

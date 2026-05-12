@@ -54,6 +54,24 @@ class ProcessedVideoRecorderTest {
         assertThat(recent.get(99).title()).isEqualTo("v1"); // v0 was trimmed off
     }
 
+    @Test
+    void recent_onMissingKey_returnsEmptyList() {
+        // @AfterEach deletes the key; nothing has been written this test
+        assertThat(recorder.recent()).isEmpty();
+    }
+
+    @Test
+    void recent_withMalformedJsonElement_skipsThatElementOnly() {
+        // Manually push a junk string, then a valid entry
+        redis.opsForList().leftPush(KEY, "{not valid json");
+        recorder.record(sample("good"));
+
+        List<ProcessedVideoEntry> recent = recorder.recent();
+
+        assertThat(recent).hasSize(1);
+        assertThat(recent.get(0).title()).isEqualTo("good");
+    }
+
     private ProcessedVideoEntry sample(String title) {
         return new ProcessedVideoEntry(
                 Instant.parse("2026-05-11T20:14:33Z"),

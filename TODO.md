@@ -4,4 +4,5 @@
 - [X] add a tag exclusion list defined in properties
 - [ ] replace cons and loggers with lombok annotations
 - [ ] OAuth2 support to get full youtube access
+- [ ] remove videos from the source YouTube playlist once successfully processed (depends on OAuth2 — playlist mutation requires write scope, not API-key access)
 

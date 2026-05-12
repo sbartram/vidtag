@@ -5,20 +5,27 @@ spring:
     anthropic:
       api-key: ${VIDTAG_CLAUDE_API_KEY:}
       chat:
-        model: claude-sonnet-4-7
-#        model: claude-opus-4-7
+#        model: claude-sonnet-4-6
+        model: claude-opus-4-7
 
 # Actuator Management Endpoints
 management:
   endpoints:
     web:
       exposure:
-        include: health,metrics
+        include: health,metrics,info,env
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
     metrics:
       enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  env:
+    name: bartram
 
 logging:
   level:
@@ -45,7 +52,7 @@ vidtag:
 
   # Error response configuration
   error:
-    include-stack-trace: ${INCLUDE_STACK_TRACE:false}
+    include-stack-trace: ${INCLUDE_STACK_TRACE:true}
     include-binding-errors: true
     max-stack-trace-length: 2000
 
@@ -54,7 +61,7 @@ vidtag:
     enabled: true  # Enable/disable scheduled playlist processing
     fixed-delay: 1h  # Delay between job executions (Duration: 1h, 30m, etc.)
     initial-delay: 60s  # Initial delay before first execution (Duration)
-    playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
+    playlist-ids: ${VIDTAG_YT_PLAYLIST_IDS:PLlQSMwNu3mELEgEnE2O7oL74UQls2r3x4,PLlQSMwNu3mELs3zOFANjQmRQLpI6vO5MK,PLlQSMwNu3mELXK0RkVTkEeZmg4JxOk1h_,PLlQSMwNu3mELhveEWgz8SDIWn_xZLZOq8}  # Comma-separated YouTube playlist IDs (e.g., PLxxx...,PLyyy... from https://www.youtube.com/playlist?list=PLxxx...)
 
   # Unsorted Bookmark Processor Configuration
   unsorted-processor:

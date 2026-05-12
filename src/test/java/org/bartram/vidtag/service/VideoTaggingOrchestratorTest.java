@@ -10,12 +10,15 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.event.ProgressEvent;
+import org.bartram.vidtag.event.VideoProcessedEvent;
 import org.bartram.vidtag.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Unit tests for VideoTaggingOrchestrator.
@@ -35,6 +38,9 @@ class VideoTaggingOrchestratorTest {
     @Mock
     private CollectionSelectionService collectionSelectionService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private VideoTaggingOrchestrator orchestrator;
 
     private List<ProgressEvent> capturedEvents;
@@ -43,7 +49,7 @@ class VideoTaggingOrchestratorTest {
     @BeforeEach
     void setUp() {
         orchestrator = new VideoTaggingOrchestrator(
-                youtubeService, raindropService, videoTaggingService, collectionSelectionService);
+                youtubeService, raindropService, videoTaggingService, collectionSelectionService, eventPublisher);
         // Default mock behavior for collection selection
         when(collectionSelectionService.selectCollection(anyString())).thenReturn("Tech Videos");
         capturedEvents = new ArrayList<>();
@@ -421,5 +427,44 @@ class VideoTaggingOrchestratorTest {
 
         // Then
         verify(videoTaggingService).generateTags(eq(video), any(), eq(strategy));
+    }
+
+    @Test
+    void processPlaylist_publishesVideoProcessedEventForEachProcessedVideo() {
+        // Given
+        TagPlaylistRequest request = new TagPlaylistRequest("PLtest123", null, null, null);
+
+        VideoMetadata video = new VideoMetadata(
+                "video1", "https://youtube.com/watch?v=video1", "Java Tutorial", "Description", Instant.now(), 600);
+
+        List<TagWithConfidence> generatedTags =
+                List.of(new TagWithConfidence("java", 0.95, true), new TagWithConfidence("tutorial", 0.85, false));
+
+        when(youtubeService.extractPlaylistId("PLtest123")).thenReturn("PLtest123");
+        when(collectionSelectionService.selectCollection("PLtest123")).thenReturn("Videos");
+        when(raindropService.resolveCollectionId(eq("default"), eq("Videos"))).thenReturn(1001L);
+        when(raindropService.getUserTags("default")).thenReturn(List.of());
+        when(youtubeService.fetchPlaylistVideos(eq("PLtest123"), isNull())).thenReturn(List.of(video));
+        when(raindropService.bookmarkExists(eq(1001L), eq("https://youtube.com/watch?v=video1")))
+                .thenReturn(false);
+        when(videoTaggingService.generateTags(eq(video), any(), any())).thenReturn(generatedTags);
+
+        // When
+        orchestrator.processPlaylist(request, eventCaptor);
+
+        // Then
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher, atLeastOnce()).publishEvent(captor.capture());
+
+        List<VideoProcessedEvent> processedEvents = captor.getAllValues().stream()
+                .filter(VideoProcessedEvent.class::isInstance)
+                .map(VideoProcessedEvent.class::cast)
+                .toList();
+
+        assertThat(processedEvents).hasSize(1);
+        ProcessedVideoEntry entry = processedEvents.get(0).entry();
+        assertThat(entry.source()).isEqualTo(Source.PLAYLIST);
+        assertThat(entry.status()).isEqualTo(ProcessingStatus.SUCCESS);
+        assertThat(entry.collection()).isEqualTo("Videos");
     }
 }

@@ -1,15 +1,21 @@
 package org.bartram.vidtag.service;
 
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.config.UnsortedProcessorProperties;
+import org.bartram.vidtag.event.VideoProcessedEvent;
+import org.bartram.vidtag.model.ProcessedVideoEntry;
+import org.bartram.vidtag.model.ProcessingStatus;
 import org.bartram.vidtag.model.Raindrop;
 import org.bartram.vidtag.model.RaindropTag;
+import org.bartram.vidtag.model.Source;
 import org.bartram.vidtag.model.TagStrategy;
 import org.bartram.vidtag.model.TagWithConfidence;
 import org.bartram.vidtag.model.VideoMetadata;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +37,7 @@ public class UnsortedBookmarkProcessor {
     private final VideoTaggingService videoTaggingService;
     private final CollectionSelectionService collectionSelectionService;
     private final UnsortedProcessorProperties properties;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Scheduled job that processes unsorted YouTube bookmarks.
@@ -116,6 +123,7 @@ public class UnsortedBookmarkProcessor {
                         .addArgument(e.getMessage())
                         .setCause(e)
                         .log();
+                publishEntry(buildEntry(raindrop.title(), raindrop.link(), ProcessingStatus.FAILED, List.of(), null));
                 failed++;
             }
         }
@@ -153,6 +161,7 @@ public class UnsortedBookmarkProcessor {
                     .setMessage("Video not found on YouTube, skipping: {}")
                     .addArgument(videoId)
                     .log();
+            publishEntry(buildEntry(raindrop.title(), raindrop.link(), ProcessingStatus.SKIPPED, List.of(), null));
             return false;
         }
 
@@ -174,6 +183,16 @@ public class UnsortedBookmarkProcessor {
                 .addArgument(tagNames.size())
                 .log();
 
+        publishEntry(buildEntry(video.title(), video.url(), ProcessingStatus.SUCCESS, tagNames, collectionTitle));
         return true;
+    }
+
+    private ProcessedVideoEntry buildEntry(
+            String title, String url, ProcessingStatus status, List<String> tags, String collection) {
+        return new ProcessedVideoEntry(Instant.now(), Source.UNSORTED, title, url, status, tags, collection);
+    }
+
+    private void publishEntry(ProcessedVideoEntry entry) {
+        eventPublisher.publishEvent(new VideoProcessedEvent(entry));
     }
 }

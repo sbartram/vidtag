@@ -1,5 +1,6 @@
 package org.bartram.vidtag.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bartram.vidtag.dto.TagPlaylistRequest;
 import org.bartram.vidtag.event.ProgressEvent;
+import org.bartram.vidtag.event.VideoProcessedEvent;
 import org.bartram.vidtag.model.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,7 @@ public class VideoTaggingOrchestrator {
     private final RaindropService raindropService;
     private final VideoTaggingService videoTaggingService;
     private final CollectionSelectionService collectionSelectionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Processes a YouTube playlist asynchronously, tagging videos and saving them to Raindrop.
@@ -147,6 +151,8 @@ public class VideoTaggingOrchestrator {
                             batchFailed++;
                         }
                     }
+
+                    publishProcessedEvent(result, collectionTitle);
                 }
 
                 // Emit batch completed event
@@ -256,6 +262,28 @@ public class VideoTaggingOrchestrator {
 
             return result;
         }
+    }
+
+    /**
+     * Publishes a {@link VideoProcessedEvent} for a processed video.
+     *
+     * @param result the processing result
+     * @param collectionTitle the Raindrop collection name
+     */
+    private void publishProcessedEvent(VideoProcessingResult result, String collectionTitle) {
+        List<String> tagLabels =
+                result.selectedTags().stream().map(TagWithConfidence::tag).toList();
+
+        ProcessedVideoEntry entry = new ProcessedVideoEntry(
+                Instant.now(),
+                Source.PLAYLIST,
+                result.video().title(),
+                result.video().url(),
+                result.status(),
+                tagLabels,
+                collectionTitle);
+
+        eventPublisher.publishEvent(new VideoProcessedEvent(entry));
     }
 
     /**

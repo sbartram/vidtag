@@ -78,6 +78,20 @@ docker compose down
 
 See [docs/DOCKER.md](docs/DOCKER.md) for comprehensive Docker deployment guide.
 
+### Release & Deploy
+```bash
+# axion-release: bumps Chart.yaml appVersion, tags v$VERSION, pushes via SSH.
+# Requires HEAD == origin/main — push local commits first or verifyRelease fails.
+./gradlew release
+
+# Build + push image to registry.bartram.org/bartram/vidtag:$VERSION, then helm upgrade.
+# Reads $VERSION from `./gradlew currentVersion`. Requires VIDTAG_CLAUDE_API_KEY set.
+./deploy.sh
+
+# Typical: git push && ./gradlew release && ./deploy.sh
+```
+Live cluster: kubectl context `k3s-ansible`, namespace `vidtag`.
+
 ## Architecture
 
 ### Dependency Management
@@ -121,6 +135,8 @@ The project uses Testcontainers for integration testing:
 - `TestVidtagApplication` - Entry point for running the app with Testcontainers configuration
 - `TestcontainersConfiguration` - Provides a Redis container for tests using `@ServiceConnection`
 - This allows tests to run against real Redis instances without manual Docker setup
+- Integration tests use the `*IT.java` suffix (same `test` task; no separate command).
+- Controller tests use `MockMvcBuilders.standaloneSetup(...)` + `@ExtendWith(MockitoExtension.class)`, not `@WebMvcTest` (Spring Boot 4 slice tests have issues with `@EnableCaching`). See `PlaylistTaggingControllerTest`.
 
 ### Package Structure
 All application code resides in `org.bartram.vidtag`. The project is currently in early stages with minimal implementation.
@@ -206,6 +222,11 @@ When adding new features to this Spring Boot application:
 4. Write integration tests using Testcontainers to validate against real Redis instances
 5. The application uses Spring Boot 4.0.6, which may have different APIs than Spring Boot 3.x (check documentation links in HELP.md)
 6. Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+
+### Working notes for Claude
+- Classes use Lombok heavily (`@Slf4j`, `@RequiredArgsConstructor`, `@Data`). IDE diagnostics from the JetBrains MCP like `log cannot be resolved`, "blank final field may not have been initialized", "constructor X undefined", "method get/setX undefined" are noise — they reflect missing annotation processing in the IDE, not real errors. `./gradlew build` is authoritative.
+- Design specs and implementation plans live under `docs/plans/YYYY-MM-DD-<topic>-{design,plan}.md` (project convention; the superpowers skills default to `docs/superpowers/...` — override that).
+- Spotless is build-enforced. On `spotlessCheck` failure, run `./gradlew spotlessApply` and commit.
 
 ## Implementation Status
 

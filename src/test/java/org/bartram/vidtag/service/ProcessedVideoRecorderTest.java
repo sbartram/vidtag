@@ -19,8 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Import(TestcontainersConfiguration.class)
 class ProcessedVideoRecorderTest {
 
-    private static final String KEY = "vidtag:processed:recent";
-
     @Autowired
     private ProcessedVideoRecorder recorder;
 
@@ -29,7 +27,7 @@ class ProcessedVideoRecorderTest {
 
     @AfterEach
     void cleanUp() {
-        redis.delete(KEY);
+        redis.delete(ProcessedVideoRecorder.KEY);
     }
 
     @Test
@@ -63,7 +61,7 @@ class ProcessedVideoRecorderTest {
     @Test
     void recent_withMalformedJsonElement_skipsThatElementOnly() {
         // Manually push a junk string, then a valid entry
-        redis.opsForList().leftPush(KEY, "{not valid json");
+        redis.opsForList().leftPush(ProcessedVideoRecorder.KEY, "{not valid json");
         recorder.record(sample("good"));
 
         List<ProcessedVideoEntry> recent = recorder.recent();

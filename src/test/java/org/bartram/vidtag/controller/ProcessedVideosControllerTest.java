@@ -85,6 +85,36 @@ class ProcessedVideosControllerTest {
     }
 
     @Test
+    void shortYoutubeUrl_titleWrappedInAnchor() throws Exception {
+        when(recorder.recent()).thenReturn(List.of(entry("ok", "https://youtu.be/abc")));
+
+        String body = body(mockMvc.perform(get("/processed")).andReturn());
+
+        assertThat(body).contains("<a href=\"https://youtu.be/abc\">ok</a>");
+    }
+
+    @Test
+    void mobileYoutubeUrl_titleWrappedInAnchor() throws Exception {
+        when(recorder.recent()).thenReturn(List.of(entry("ok", "https://m.youtube.com/watch?v=abc")));
+
+        String body = body(mockMvc.perform(get("/processed")).andReturn());
+
+        assertThat(body).contains("<a href=\"https://m.youtube.com/watch?v=abc\">ok</a>");
+    }
+
+    @Test
+    void urlWithUserinfo_titleRendersWithoutAnchor() throws Exception {
+        when(recorder.recent()).thenReturn(List.of(entry("phish", "https://attacker@www.youtube.com/watch?v=abc")));
+
+        String body = body(mockMvc.perform(get("/processed")).andReturn());
+
+        assertThat(body).doesNotContain("href=\"https://attacker@");
+        assertThat(body)
+                .doesNotContain(
+                        "href=\"https://www.youtube.com/watch?v=abc"); // even host-only fallback shouldn't anchor
+    }
+
+    @Test
     void emptyList_rendersPlaceholder() throws Exception {
         when(recorder.recent()).thenReturn(List.of());
 

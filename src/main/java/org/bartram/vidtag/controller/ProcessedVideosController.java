@@ -106,7 +106,9 @@ public class ProcessedVideosController {
         }
         try {
             URI uri = URI.create(url);
-            return "https".equals(uri.getScheme()) && ALLOWED_HOSTS.contains(uri.getHost());
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && uri.getUserInfo() == null
+                    && ALLOWED_HOSTS.contains(uri.getHost());
         } catch (IllegalArgumentException e) {
             return false;
         }

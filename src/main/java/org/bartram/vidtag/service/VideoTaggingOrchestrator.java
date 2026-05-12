@@ -271,9 +271,8 @@ public class VideoTaggingOrchestrator {
      * @param collectionTitle the Raindrop collection name
      */
     private void publishProcessedEvent(VideoProcessingResult result, String collectionTitle) {
-        List<String> tagLabels = result.selectedTags() == null
-                ? List.of()
-                : result.selectedTags().stream().map(TagWithConfidence::tag).toList();
+        List<String> tagLabels =
+                result.selectedTags().stream().map(TagWithConfidence::tag).toList();
 
         ProcessedVideoEntry entry = new ProcessedVideoEntry(
                 Instant.now(),

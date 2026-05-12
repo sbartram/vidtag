@@ -454,7 +454,7 @@ class VideoTaggingOrchestratorTest {
 
         // Then
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher, atLeastOnce()).publishEvent(captor.capture());
+        verify(eventPublisher, times(1)).publishEvent(captor.capture());
 
         List<VideoProcessedEvent> processedEvents = captor.getAllValues().stream()
                 .filter(VideoProcessedEvent.class::isInstance)

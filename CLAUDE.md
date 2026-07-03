@@ -350,3 +350,7 @@ vidtag:
 - Intelligent categorization based on playlist content
 - Consistent behavior across API and scheduler
 - Cached decisions reduce AI API costs
+
+## Homelab
+
+Shared infra facts (registry, pg, k3s nodes, LB IPs, deploy conventions): @../HOMELAB.md

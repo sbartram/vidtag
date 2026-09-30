@@ -11,7 +11,7 @@ app:
     type: LoadBalancer
     port: 80
     annotations:
-      metallb.universe.tf/loadBalancerIPs: "192.168.44.211"
+      metallb.io/loadBalancerIPs: "192.168.44.211"
   resources:
     requests:
       memory: "512Mi"
